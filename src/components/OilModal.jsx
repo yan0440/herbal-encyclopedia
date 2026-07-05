@@ -68,11 +68,14 @@ export default function OilModal({ item, onClose }) {
           <div>
             <span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span>
             <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E] leading-relaxed">
-              {(oilDetails.historyMyth || '').split('\n').map((paragraph, index) => (
-                <p key={index} className="mb-3 last:mb-0">
-                  {paragraph}
-                </p>
-              ))}
+              {(oilDetails.historyMyth || '')
+  .split(/\r?\n/) // 💡 同時支援 Windows (\r\n) 與 Mac (\n) 的換行
+  .filter(paragraph => paragraph.trim() !== '') // 💡 自動過濾掉因為多按 Enter 產生的空白行
+  .map((paragraph, index) => (
+    <p key={index} className="mb-4 last:mb-0 text-[#6B7A6E] leading-relaxed">
+      {paragraph}
+    </p>
+  ))}
             </div>
           </div>
 

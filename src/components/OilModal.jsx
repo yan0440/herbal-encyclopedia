@@ -108,20 +108,20 @@ export default function OilModal({ item, onClose }) {
             <div className="mt-2"><span className="font-bold block text-xs">🧪 精油配方</span><p className="text-[#3A4F3F] font-medium text-xs mt-0.5">{oilDetails.formulas}</p></div>
             <div className="mt-2"><span className="font-bold block text-xs">🧴 按摩基底油</span><p className="text-[#6B7A6E] text-xs mt-0.5">{oilDetails.carrierOils}</p></div>
             
-            {/* 💡 【方法二實作】使用方法（通常使用方法也可能很長，同步幫你加上分段功能） */}
-            <div className="mt-2 border-t border-[#E5E0D8] pt-2">
-              <span className="font-bold block text-xs text-[#4E6654] mb-1">🚀 使用方法</span>
-              <div className="text-[#3A4F3F] text-xs leading-relaxed">
-                {(oilDetails.usage || '')
-  .split(/\\n|\r?\n/) // 👈 同步修改這裡
-  .filter(paragraph => paragraph.trim() !== '')
-  .map((paragraph, index) => (
-    <p key={index} className="mb-2 last:mb-0 block">
-      {paragraph}
-    </p>
-  ))}
-              </div>
-            </div>
+            {/* 🚀 使用方法 */}
+<div className="mt-2 border-t border-[#E5E0D8] pt-2">
+  <span className="font-bold block text-xs text-[#4E6654] mb-1.5">🚀 使用方法</span>
+  {/* 💡 同步改為 px-5 與 break-all */}
+  <div className="text-[#3A4F3F] text-xs leading-relaxed break-all px-1">
+    {(oilDetails.usage || '').split(/\\n|\r?\n/)
+      .filter(paragraph => paragraph.trim() !== '')
+      .map((paragraph, index) => (
+        <p key={index} className="mb-2 last:mb-0 text-justify">
+          {paragraph}
+        </p>
+      ))}
+  </div>
+</div>
           </div>
         </div>
 

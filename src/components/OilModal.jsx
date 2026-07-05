@@ -3,15 +3,23 @@ import React from 'react';
 export default function OilModal({ item, onClose }) {
   if (!item) return null;
 
-  // 🧠 智慧型段落渲染助手：安全、標準且相容所有系統與 Linter 檢查
+  // 🧠 終極超感應段落助手：沒打 \n 也能自動辨識 1. 2. 3. 並精準分段與縮進
   const renderSmartParagraphs = (text, customClasses = "") => {
     if (!text) return null;
-    return text
-      .split(/\\n|\r?\n/)
-      .filter(p => p.trim() !== '')
+    
+    let paragraphs = [];
+    // 💡 核心升級：如果文字裡沒有換行符號，但偵測到有數字列表結構，就自動用數字邊界切開
+    if (!text.includes('\n') && /\d+[.、)]/.test(text)) {
+      paragraphs = text.split(/(?=\d+[.、)])/).map(p => p.trim());
+    } else {
+      // 如果本來就有換行，就照原本的系統換行切分
+      paragraphs = text.split(/\\n|\r?\n/).map(p => p.trim());
+    }
+
+    return paragraphs
+      .filter(p => p !== '')
       .map((paragraph, index) => {
-        // 🔍 修正後的乾淨語法，移除 useless escape，百分之百通過 ESLint 檢查
-        const isNumbered = /^(\d+[.、)]|[\u2460-\u2473])/.test(paragraph.trim());
+        const isNumbered = /^(\d+[.、)]|[\u2460-\u2473])/.test(paragraph);
         return (
           <p 
             key={index} 
@@ -46,7 +54,7 @@ export default function OilModal({ item, onClose }) {
           {item.englishName}
         </p>
 
-        {/* 📊 精油 11 項表格 */}
+        {/* 📊 精油 11 項表格（內部儲存格全面接入智慧排版） */}
         <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -62,8 +70,19 @@ export default function OilModal({ item, onClose }) {
               <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{item.oilTable?.family}</td></tr>
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">性味</td><td className="px-4 py-2">{item.oilTable?.nature}</td></tr>
               <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{item.oilTable?.meridian}</td></tr>
-              <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td><td className="px-4 py-2">{item.oilTable?.constitution}</td></tr>
-              <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td><td className="px-4 py-2 break-all text-justify">{item.oilTable?.indications}</td></tr>
+              
+              {/* 💡 適用體質：串接排版引擎 */}
+              <tr className="bg-white">
+                <td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td>
+                <td className="px-4 py-2">{renderSmartParagraphs(item.oilTable?.constitution, "mb-1 last:mb-0 text-[#3A4F3F]")}</td>
+              </tr>
+              
+              {/* 💡 主治功能：串接排版引擎 */}
+              <tr className="bg-[#FBFBFA]/40">
+                <td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td>
+                <td className="px-4 py-2">{renderSmartParagraphs(item.oilTable?.indications, "mb-1 last:mb-0 text-[#3A4F3F]")}</td>
+              </tr>
+              
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">類比音符</td><td className="px-4 py-2">{item.oilTable?.noteAnalogy}</td></tr>
               <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{item.oilTable?.planet}</td></tr>
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">重要產地</td><td className="px-4 py-2">{item.oilTable?.origin}</td></tr>

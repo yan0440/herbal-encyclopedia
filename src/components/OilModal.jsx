@@ -111,11 +111,14 @@ export default function OilModal({ item, onClose }) {
             <div className="mt-2 border-t border-[#E5E0D8] pt-2">
               <span className="font-bold block text-xs text-[#4E6654] mb-1">🚀 使用方法</span>
               <div className="text-[#3A4F3F] text-xs leading-relaxed">
-                {(oilDetails.usage || '').split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-2 last:mb-0">
-                    {paragraph}
-                  </p>
-                ))}
+                {(oilDetails.usage || '')
+  .split(/\r?\n/)
+  .filter(paragraph => paragraph.trim() !== '')
+  .map((paragraph, index) => (
+    <p key={index} className="mb-2 last:mb-0">
+      {paragraph}
+    </p>
+  ))}
               </div>
             </div>
           </div>

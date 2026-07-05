@@ -68,11 +68,12 @@ export default function OilModal({ item, onClose }) {
           <div>
             <span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span>
             <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E] leading-relaxed">
-              {(oilDetails.historyMyth || '')
-  .split(/\r?\n/) // 💡 同時支援 Windows (\r\n) 與 Mac (\n) 的換行
-  .filter(paragraph => paragraph.trim() !== '') // 💡 自動過濾掉因為多按 Enter 產生的空白行
+              {/* 💡 終極威力加強版：支援純文字 \n 與所有系統換行 */}
+{(oilDetails.historyMyth || '')
+  .split(/\\n|\r?\n/) // 👈 關鍵：加上了 \\n，這樣就算資料裡是純文字的 \n 也能完美切開！
+  .filter(paragraph => paragraph.trim() !== '')
   .map((paragraph, index) => (
-    <p key={index} className="mb-4 last:mb-0 text-[#6B7A6E] leading-relaxed">
+    <p key={index} className="mb-4 last:mb-0 text-[#6B7A6E] leading-relaxed block">
       {paragraph}
     </p>
   ))}
@@ -112,10 +113,10 @@ export default function OilModal({ item, onClose }) {
               <span className="font-bold block text-xs text-[#4E6654] mb-1">🚀 使用方法</span>
               <div className="text-[#3A4F3F] text-xs leading-relaxed">
                 {(oilDetails.usage || '')
-  .split(/\r?\n/)
+  .split(/\\n|\r?\n/) // 👈 同步修改這裡
   .filter(paragraph => paragraph.trim() !== '')
   .map((paragraph, index) => (
-    <p key={index} className="mb-2 last:mb-0">
+    <p key={index} className="mb-2 last:mb-0 block">
       {paragraph}
     </p>
   ))}

@@ -39,11 +39,11 @@ export const oilData = [
   {
     id: "oil-2",
     category: "精油",
-    name: "茶樹精油",
-    englishName: "Tea Tree",
-    constitutionTag: "濕熱",
-    chemicalTag: "單萜醇",
-    tag: "淨化控油",
+    name: "歐白芷",
+    englishName: "Angelica",
+    constitutionTag: "血瘀",
+    chemicalTag: "單萜烯",
+    tag: "未知",
     description: "強效的淨化能力，針對黑頭、痘痘及中油性肌膚有極佳的油脂平衡與全面防護成效。",
     oilTable: {
       typePart: "互生葉白千層 / 葉片與嫩枝",
@@ -53,6 +53,8 @@ export const oilData = [
       nature: "辛、苦，性寒",
       meridian: "入肺、胃、大腸經",
       constitution: "適合濕熱蘊結、油脂過剩、易長粉刺黑頭體質",
+      // 💡 記得在資料庫這裡補上 indications 欄位
+      indications: "失眠多夢、心神不寧、燙傷修復、緩解偏頭痛、平撫焦慮氣息。",
       noteAnalogy: "高音符 (Top Note)",
       planet: "火星 (Mars) - 主掌防禦與免疫戰鬥力",
       origin: "澳洲新南威爾斯州"

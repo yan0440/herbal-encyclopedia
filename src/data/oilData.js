@@ -10,8 +10,8 @@ export const oilData = [
     oilTable: {
       typePart: "樹 / 木材",
       method: "蒸餾法",
-      latin: "阿米香樹屬　Amyris balsamifera",
-      family: "芸香科　Rutaceae",
+      latin: "阿米香樹屬 Amyris balsamifera",
+      family: "芸香科 Rutaceae",
       nature: "未知",
       meridian: "未知",
       constitution: "未知",
@@ -48,8 +48,8 @@ export const oilData = [
     oilTable: {
       typePart: "藥草／種子或根",
       method: "蒸餾法",
-      latin: "當歸屬　Angelica archangelica",
-      family: "繖形科　Umbelliferae",
+      latin: "當歸屬 Angelica archangelica",
+      family: "繖形科 Apiaceae",
       nature: "辛、甘、苦、溫",
       meridian: "入心、肝、脾經",
       constitution: "活血、行氣、祛風",

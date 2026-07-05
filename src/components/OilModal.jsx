@@ -4,6 +4,26 @@ export default function OilModal({ item, onClose }) {
   if (!item) return null;
   const { oilTable, oilDetails } = item;
 
+  // 🧠 智慧型段落渲染助手：自動辨識有沒有編號，並給予完美的排版
+  const renderSmartParagraphs = (text, customClasses = "") => {
+    if (!text) return null;
+    return text
+      .split(/\\n|\r?\n/)
+      .filter(p => p.trim() !== '')
+      .map((paragraph, index) => {
+        // 🔍 偵測段落開頭是不是數字（例如: 1. 2、 3) 等）
+        const isNumbered = /^(\d+[\.\、\)]|[\u2460-\u2473])/.test(paragraph.trim());
+        return (
+          <p 
+            key={index} 
+            className={`text-justify leading-relaxed break-all ${isNumbered ? 'pl-6 -indent-6' : ''} ${customClasses}`}
+          >
+            {paragraph}
+          </p>
+        );
+      });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/30 text-sm" onClick={(e) => e.stopPropagation()}>
@@ -27,7 +47,7 @@ export default function OilModal({ item, onClose }) {
           {item.englishName}
         </p>
 
-        {/* 📊 精油 11 項表格（已加入主治功能） */}
+        {/* 📊 精油 11 項表格 */}
         <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -44,10 +64,7 @@ export default function OilModal({ item, onClose }) {
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">性味</td><td className="px-4 py-2">{oilTable.nature}</td></tr>
               <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{oilTable.meridian}</td></tr>
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td><td className="px-4 py-2">{oilTable.constitution}</td></tr>
-              
-              {/* 💡 新增：主治功能 */}
               <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td><td className="px-4 py-2 break-all text-justify">{oilTable.indications}</td></tr>
-              
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">類比音符</td><td className="px-4 py-2">{oilTable.noteAnalogy}</td></tr>
               <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{oilTable.planet}</td></tr>
               <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">重要產地</td><td className="px-4 py-2">{oilTable.origin}</td></tr>
@@ -71,15 +88,8 @@ export default function OilModal({ item, onClose }) {
           {/* 📜 應用歷史與相關神話 */}
           <div>
             <span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span>
-            <div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E] leading-relaxed break-all">
-              {(oilDetails.historyMyth || '')
-                .split(/\\n|\r?\n/)
-                .filter(paragraph => paragraph.trim() !== '')
-                .map((paragraph, index) => (
-                  <p key={index} className="mb-２ last:mb-0 text-[#6B7A6E] leading-relaxed text-justify">
-                    {paragraph}
-                  </p>
-                ))}
+            <div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E]">
+              {renderSmartParagraphs(oilDetails.historyMyth, "mb-4 last:mb-0 text-[#6B7A6E]")}
             </div>
           </div>
 
@@ -103,33 +113,24 @@ export default function OilModal({ item, onClose }) {
           <div className="space-y-4 bg-[#F7F5F0]/60 p-4 rounded-xl border border-[#E5E0D8]/40">
             <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-1 text-base">🩺 深度效能</span>
             
-            {/* 🧠 心靈療效 */}
             <div>
               <span className="font-bold text-[#4E6654] text-xs block mb-1">🧠 心靈療效：</span>
-              <div className="pl-2 border-l-2 border-[#A39284] text-[#6B7A6E] text-xs leading-relaxed break-all">
-                {(oilDetails.mindEffect || '').split(/\\n|\r?\n/)
-                  .filter(p => p.trim() !== '')
-                  .map((p, i) => <p key={i} className="mb-1.5 last:mb-0 text-justify">{p}</p>)}
+              <div className="pl-2 border-l-2 border-[#A39284] text-xs">
+                {renderSmartParagraphs(oilDetails.mindEffect, "mb-1.5 last:mb-0 text-[#6B7A6E]")}
               </div>
             </div>
 
-            {/* 💪 身體療效 */}
             <div>
               <span className="font-bold text-[#4E6654] text-xs block mb-1">💪 身體療效：</span>
-              <div className="pl-2 border-l-2 border-[#A39284] text-[#6B7A6E] text-xs leading-relaxed break-all">
-                {(oilDetails.bodyEffect || '').split(/\\n|\r?\n/)
-                  .filter(p => p.trim() !== '')
-                  .map((p, i) => <p key={i} className="mb-1.5 last:mb-0 text-justify">{p}</p>)}
+              <div className="pl-2 border-l-2 border-[#A39284] text-xs">
+                {renderSmartParagraphs(oilDetails.bodyEffect, "mb-1.5 last:mb-0 text-[#6B7A6E]")}
               </div>
             </div>
 
-            {/* 🧴 皮膚療效 */}
             <div>
               <span className="font-bold text-[#4E6654] text-xs block mb-1">🧴 皮膚療效：</span>
-              <div className="pl-2 border-l-2 border-[#A39284] text-[#6B7A6E] text-xs leading-relaxed break-all">
-                {(oilDetails.skinEffect || '').split(/\\n|\r?\n/)
-                  .filter(p => p.trim() !== '')
-                  .map((p, i) => <p key={i} className="mb-1.5 last:mb-0 text-justify">{p}</p>)}
+              <div className="pl-2 border-l-2 border-[#A39284] text-xs">
+                {renderSmartParagraphs(oilDetails.skinEffect, "mb-1.5 last:mb-0 text-[#6B7A6E]")}
               </div>
             </div>
           </div>
@@ -142,14 +143,8 @@ export default function OilModal({ item, onClose }) {
             {/* 🚀 使用方法 */}
             <div className="mt-2 border-t border-[#E5E0D8] pt-2">
               <span className="font-bold block text-xs text-[#4E6654] mb-1.5">🚀 使用方法</span>
-              <div className="text-[#3A4F3F] text-xs leading-relaxed break-all px-1">
-                {(oilDetails.usage || '').split(/\\n|\r?\n/)
-                  .filter(paragraph => paragraph.trim() !== '')
-                  .map((paragraph, index) => (
-                    <p key={index} className="mb-2 last:mb-0 text-justify">
-                      {paragraph}
-                    </p>
-                  ))}
+              <div className="text-xs px-1">
+                {renderSmartParagraphs(oilDetails.usage, "mb-2 last:mb-0 text-[#3A4F3F]")}
               </div>
             </div>
           </div>

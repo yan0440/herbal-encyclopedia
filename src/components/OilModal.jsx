@@ -64,19 +64,18 @@ export default function OilModal({ item, onClose }) {
             </div>
           </div>
 
-          {/* 💡 【方法二實作】應用歷史與相關神話（支援多段落自動換行與間距） */}
+          {/* 📜 應用歷史與相關神話 */}
           <div>
             <span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span>
-            {/* 💡 左右改成 px-5 加寬，並加上 break-all 確保字體絕對不會衝出框外 */}
-  <div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E] leading-relaxed break-all">
-    {(oilDetails.historyMyth || '')
-  .split(/\\n|\r?\n/) // 👈 關鍵：加上了 \\n，這樣就算資料裡是純文字的 \n 也能完美切開！
-  .filter(paragraph => paragraph.trim() !== '')
-  .map((paragraph, index) => (
-    <p key={index} className="mb-4 last:mb-0 text-[#6B7A6E] leading-relaxed text-justify">
-      {paragraph}
-    </p>
-  ))}
+            <div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E] leading-relaxed break-all">
+              {(oilDetails.historyMyth || '')
+                .split(/\\n|\r?\n/)
+                .filter(paragraph => paragraph.trim() !== '')
+                .map((paragraph, index) => (
+                  <p key={index} className="mb-2 last:mb-0 text-[#6B7A6E] leading-relaxed text-justify">
+                    {paragraph}
+                  </p>
+                ))}
             </div>
           </div>
 
@@ -96,11 +95,39 @@ export default function OilModal({ item, onClose }) {
             <p className="text-red-700/90 text-xs leading-relaxed">{oilDetails.caution}</p>
           </div>
 
-          <div className="space-y-3 bg-[#F7F5F0]/60 p-4 rounded-xl border border-[#E5E0D8]/40">
-            <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-2 text-base">🩺 深度效能</span>
-            <div><span className="font-bold text-[#4E6654] text-xs block">🧠 心靈療效：</span><p className="text-[#6B7A6E] text-xs mt-0.5 pl-2 border-l-2 border-[#A39284]">{oilDetails.mindEffect}</p></div>
-            <div className="mt-2"><span className="font-bold text-[#4E6654] text-xs block">💪 身體療效：</span><p className="text-[#6B7A6E] text-xs mt-0.5 pl-2 border-l-2 border-[#A39284]">{oilDetails.bodyEffect}</p></div>
-            <div className="mt-2"><span className="font-bold text-[#4E6654] text-xs block">🧴 皮膚療效：</span><p className="text-[#6B7A6E] text-xs mt-0.5 pl-2 border-l-2 border-[#A39284]">{oilDetails.skinEffect}</p></div>
+          {/* 🩺 深度效能（全面支援多段落分段與自動斷行） */}
+          <div className="space-y-4 bg-[#F7F5F0]/60 p-4 rounded-xl border border-[#E5E0D8]/40">
+            <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-1 text-base">🩺 深度效能</span>
+            
+            {/* 🧠 心靈療效 */}
+            <div>
+              <span className="font-bold text-[#4E6654] text-xs block mb-1">🧠 心靈療效：</span>
+              <div className="pl-2 border-l-2 border-[#A39284] text-[#6B7A6E] text-xs leading-relaxed break-all">
+                {(oilDetails.mindEffect || '').split(/\\n|\r?\n/)
+                  .filter(p => p.trim() !== '')
+                  .map((p, i) => <p key={i} className="mb-1.5 last:mb-0 text-justify">{p}</p>)}
+              </div>
+            </div>
+
+            {/* 💪 身體療效 */}
+            <div>
+              <span className="font-bold text-[#4E6654] text-xs block mb-1">💪 身體療效：</span>
+              <div className="pl-2 border-l-2 border-[#A39284] text-[#6B7A6E] text-xs leading-relaxed break-all">
+                {(oilDetails.bodyEffect || '').split(/\\n|\r?\n/)
+                  .filter(p => p.trim() !== '')
+                  .map((p, i) => <p key={i} className="mb-1.5 last:mb-0 text-justify">{p}</p>)}
+              </div>
+            </div>
+
+            {/* 🧴 皮膚療效 */}
+            <div>
+              <span className="font-bold text-[#4E6654] text-xs block mb-1">🧴 皮膚療效：</span>
+              <div className="pl-2 border-l-2 border-[#A39284] text-[#6B7A6E] text-xs leading-relaxed break-all">
+                {(oilDetails.skinEffect || '').split(/\\n|\r?\n/)
+                  .filter(p => p.trim() !== '')
+                  .map((p, i) => <p key={i} className="mb-1.5 last:mb-0 text-justify">{p}</p>)}
+              </div>
+            </div>
           </div>
 
           <div className="space-y-3 bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
@@ -109,19 +136,18 @@ export default function OilModal({ item, onClose }) {
             <div className="mt-2"><span className="font-bold block text-xs">🧴 按摩基底油</span><p className="text-[#6B7A6E] text-xs mt-0.5">{oilDetails.carrierOils}</p></div>
             
             {/* 🚀 使用方法 */}
-<div className="mt-2 border-t border-[#E5E0D8] pt-2">
-  <span className="font-bold block text-xs text-[#4E6654] mb-1.5">🚀 使用方法</span>
-  {/* 💡 同步改為 px-5 與 break-all */}
-  <div className="text-[#3A4F3F] text-xs leading-relaxed break-all px-1">
-    {(oilDetails.usage || '').split(/\\n|\r?\n/)
-      .filter(paragraph => paragraph.trim() !== '')
-      .map((paragraph, index) => (
-        <p key={index} className="mb-2 last:mb-0 text-justify">
-          {paragraph}
-        </p>
-      ))}
-  </div>
-</div>
+            <div className="mt-2 border-t border-[#E5E0D8] pt-2">
+              <span className="font-bold block text-xs text-[#4E6654] mb-1.5">🚀 使用方法</span>
+              <div className="text-[#3A4F3F] text-xs leading-relaxed break-all px-1">
+                {(oilDetails.usage || '').split(/\\n|\r?\n/)
+                  .filter(paragraph => paragraph.trim() !== '')
+                  .map((paragraph, index) => (
+                    <p key={index} className="mb-2 last:mb-0 text-justify">
+                      {paragraph}
+                    </p>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
 

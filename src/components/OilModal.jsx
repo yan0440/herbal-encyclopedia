@@ -1,53 +1,31 @@
 import React from 'react';
 
-export default function AcupointModal({ item, onClose }) {
+export default function OilModal({ item, onClose }) {
   if (!item) return null;
 
-  // 🧠 穴道專用智慧排版引擎：保留原始編號、支援黑點，完美解析 **雙星號粗體**
+  // 🧠 終極超感應段落助手：沒打 \n 也能自動辨識 1. 2. 3. 並精準分段與縮進
   const renderSmartParagraphs = (text, customClasses = "") => {
     if (!text) return null;
     
-    const stringText = String(text);
     let paragraphs = [];
-    
-    // 💡 智慧段落切分：橫著連寫時，會自動依據「數字/國字編號」或「黑點符號 • - *」切分段落
-    if (!stringText.includes('\n') && /(?:\d+|[一二三四五六七八九十]+)[.、)]|[-•*]\s/.test(stringText)) {
-      paragraphs = stringText.split(/(?=(?:\d+|[一二三四五六七八九十]+)[.、)]|[-•*]\s)/).map(p => p.trim());
+    // 💡 核心升級：如果文字裡沒有換行符號，但偵測到有數字列表結構，就自動用數字邊界切開
+    if (!text.includes('\n') && /\d+[.、)]/.test(text)) {
+      paragraphs = text.split(/(?=\d+[.、)])/).map(p => p.trim());
     } else {
-      paragraphs = stringText.split(/\\n|\r?\n/).map(p => p.trim());
+      // 如果本來就有換行，就照原本的系統換行切分
+      paragraphs = text.split(/\\n|\r?\n/).map(p => p.trim());
     }
-
-    // 🔬 粗體語法解析器：將 **文字** 轉換成強化的穴道粗體標籤
-    const parseBoldSyntax = (str) => {
-      const parts = str.split(/(\*\*.*?\*\*)/g);
-      return parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return (
-            <strong 
-              key={i} 
-              className="font-bold text-[#2C3C30] bg-[#3A4F3F]/5 px-1.5 py-0.5 rounded-md mx-0.5 inline-block align-baseline"
-            >
-              {part.slice(2, -2)}
-            </strong>
-          );
-        }
-        return part;
-      });
-    };
 
     return paragraphs
       .filter(p => p !== '')
       .map((paragraph, index) => {
-        // 🔍 偵測是否為列表項目（包含編號類 或 黑點符號類）
-        const isListItem = /^((?:\d+|[一二三四五六七八九十]+)[.、)]|[\u2460-\u2473]|[-•*])/.test(paragraph);
-        
+        const isNumbered = /^(\d+[.、)]|[\u2460-\u2473])/.test(paragraph);
         return (
           <p 
             key={index} 
-            // 🎯 懸掛縮進：如果是編號或黑點開頭，自動對齊第二行，字體絕對不卡在編號下方！
-            className={`text-justify leading-relaxed break-all mb-1.5 last:mb-0 ${isListItem ? 'pl-6 -indent-6' : ''} ${customClasses}`}
+            className={`text-justify leading-relaxed break-all ${isNumbered ? 'pl-6 -indent-6' : ''} ${customClasses}`}
           >
-            {parseBoldSyntax(paragraph)}
+            {paragraph}
           </p>
         );
       });
@@ -57,110 +35,141 @@ export default function AcupointModal({ item, onClose }) {
     <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/30 text-sm" onClick={(e) => e.stopPropagation()}>
         
-        {/* ✕ 關閉按鈕 */}
         <button onClick={onClose} className="absolute top-5 right-5 text-[#A39284] hover:text-[#3A4F3F] text-xl">✕</button>
 
-        {/* 🏷️ 頂部經絡標籤 */}
-        <div className="mb-2">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#E5EAE6] text-[#4E6654]">
-            {item.meridianName || "未歸類經絡"}
+        {/* 🏷️ 頂部獨立的體質與屬性標籤 */}
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#EAE7E0] text-[#6B7A6E]">
+            {item.constitutionTag}體質
+          </span>
+          <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#E5EAE6] text-[#4E6654]">
+            {item.chemicalTag}屬性
           </span>
         </div>
 
-        {/* 穴位名稱 */}
-        <h2 className="text-3xl font-bold text-[#3A4F3F] flex items-baseline gap-2">
-          {item.name}
-          {item.pinyin && <span className="text-sm font-serif italic text-[#A39284] font-normal">{item.pinyin}</span>}
-        </h2>
+        <h2 className="text-3xl font-bold text-[#3A4F3F]">{item.name}</h2>
         
-        {/* 國際標準代號 (例如: LU7, LI4) */}
-        <p className="text-xs font-mono tracking-wider text-[#A39284] mt-0.5 mb-6 border-b border-[#F7F5F0] pb-4">
-          CODE: {item.code || "N/A"}
+        {/* 🔤 英文名字 */}
+        <p className="text-base italic text-[#A39284] mt-1 mb-6 font-serif border-b border-[#F7F5F0] pb-4">
+          {item.englishName}
         </p>
 
-        {/* 📊 穴位基本定位表格 */}
-        <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-6 shadow-sm">
+        {/* 📊 精油 11 項表格（內部儲存格全面接入智慧排版） */}
+        <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#F0EDE6] text-[#3A4F3F] font-bold border-b border-[#E5E0D8]">
-                <th className="px-4 py-2.5 w-1/3 border-r border-[#E5E0D8]">穴位指標項目</th>
-                <th className="px-4 py-2.5">解剖定位與記載</th>
+                <th className="px-4 py-2.5 w-1/3 border-r border-[#E5E0D8]">精油指標項目</th>
+                <th className="px-4 py-2.5">百科記載內容</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E0D8] text-[#3A4F3F]">
+              <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">植物種類/萃取部位</td><td className="px-4 py-2">{item.oilTable?.typePart}</td></tr>
+              <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">萃取方法</td><td className="px-4 py-2">{item.oilTable?.method}</td></tr>
+              <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">拉丁學名</td><td className="px-4 py-2 italic">{item.oilTable?.latin}</td></tr>
+              <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{item.oilTable?.family}</td></tr>
+              <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">性味</td><td className="px-4 py-2">{item.oilTable?.nature}</td></tr>
+              <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{item.oilTable?.meridian}</td></tr>
+              
+              {/* 💡 適用體質：串接排版引擎 */}
               <tr className="bg-white">
-                <td className="px-4 py-3.5 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8] valign-top">📍 精確位置</td>
-                <td className="px-4 py-3.5 text-xs leading-relaxed">{renderSmartParagraphs(item.location)}</td>
+                <td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td>
+                <td className="px-4 py-2">{renderSmartParagraphs(item.oilTable?.constitution, "mb-1 last:mb-0 text-[#3A4F3F]")}</td>
               </tr>
+              
+              {/* 💡 主治功能：串接排版引擎 */}
               <tr className="bg-[#FBFBFA]/40">
-                <td className="px-4 py-3.5 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">🔍 取穴方法</td>
-                <td className="px-4 py-3.5 text-xs leading-relaxed">{renderSmartParagraphs(item.findMethod)}</td>
+                <td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td>
+                <td className="px-4 py-2">{renderSmartParagraphs(item.oilTable?.indications, "mb-1 last:mb-0 text-[#3A4F3F]")}</td>
               </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-3.5 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">🩻 解剖層次</td>
-                <td className="px-4 py-3.5 text-xs text-[#6B7A6E]">{renderSmartParagraphs(item.anatomy)}</td>
-              </tr>
+              
+              <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">類比音符</td><td className="px-4 py-2">{item.oilTable?.noteAnalogy}</td></tr>
+              <tr className="bg-[#FBFBFA]/40"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{item.oilTable?.planet}</td></tr>
+              <tr className="bg-white"><td className="px-4 py-2 font-medium bg-[#FBFBFA] border-r border-[#E5E0D8]">重要產地</td><td className="px-4 py-2">{item.oilTable?.origin}</td></tr>
             </tbody>
           </table>
         </div>
 
-        {/* 🩺 功效功能核心區域：主要功效置頂 ➔ 分列古代與現代 */}
-        <div className="space-y-4 bg-[#F7F5F0]/70 p-5 rounded-xl border border-[#E5E0D8]/50 mb-6">
-          <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-2 text-base">🩺 穴位主治與功效</span>
-          
-          {/* 1. 主要功效 */}
-          <div className="mb-4">
-            <span className="font-bold text-[#3A4F3F] text-xs bg-[#EAE7E0] inline-block px-2.5 py-0.5 rounded shadow-sm mb-1.5">🌟 主要功效</span>
-            <div className="pl-1 text-[#3A4F3F]">
-              {renderSmartParagraphs(item.mainEffect)}
+        {/* 📝 下方細節資訊 */}
+        <div className="space-y-5 text-[#3A4F3F]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+              <span className="font-bold text-[#4E6654] block mb-1">🔍 氣味</span>
+              <p className="text-[#6B7A6E] text-xs leading-relaxed">{item.oilDetails?.scent}</p>
+            </div>
+            <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+              <span className="font-bold text-[#4E6654] block mb-1">✨ 外觀</span>
+              <p className="text-[#6B7A6E] text-xs leading-relaxed">{item.oilDetails?.appearance}</p>
             </div>
           </div>
 
-          {/* 2. 古代與現代對比欄位 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-[#E5E0D8]/60 pt-3.5">
-            <div>
-              <span className="font-bold text-[#4E6654] text-xs block mb-1.5">📜 古代文獻 / 傳統記載：</span>
-              <div className="pl-2 border-l-2 border-[#A39284]/50 text-xs text-[#6B7A6E]">
-                {renderSmartParagraphs(item.ancientEffect)}
-              </div>
-            </div>
-
-            <div>
-              <span className="font-bold text-[#4E6654] text-xs block mb-1.5">🔬 現代研究 / 科學實證：</span>
-              <div className="pl-2 border-l-2 border-[#A39284]/50 text-xs text-[#6B7A6E]">
-                {renderSmartParagraphs(item.modernEffect)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 🖐️ 按摩與配伍建議 */}
-        <div className="space-y-3 bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
+          {/* 📜 應用歷史與相關神話 */}
           <div>
-            <span className="font-bold block text-xs text-[#2C3C30]">🖐️ 按摩與理療手法</span>
-            <div className="mt-1">
-              {renderSmartParagraphs(item.massageMethod, "text-[#6B7A6E] text-xs")}
-            </div>
-          </div>
-          
-          <div className="mt-2 border-t border-[#E5E0D8] pt-2.5">
-            <span className="font-bold block text-xs text-[#2C3C30]">🔗 經典穴位配伍（搭配療效）</span>
-            <div className="mt-1">
-              {renderSmartParagraphs(item.compatibility, "text-[#3A4F3F] text-xs")}
+            <span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span>
+            <div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30 text-[#6B7A6E]">
+              {renderSmartParagraphs(item.oilDetails?.historyMyth, "mb-4 last:mb-0 text-[#6B7A6E]")}
             </div>
           </div>
 
-          <div className="bg-red-50/40 p-3 rounded-lg border border-red-200/30 mt-2">
-            <span className="font-bold text-red-800 block text-xs">⚠️ 禁忌注意</span>
-            {renderSmartParagraphs(item.caution, "text-red-700/90 text-xs mt-0.5")}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+              <span className="font-bold text-[#4E6654] block mb-1">🔬 化學結構</span>
+              <p className="text-[#6B7A6E] text-xs leading-relaxed">{item.oilDetails?.chemistry}</p>
+            </div>
+            <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+              <span className="font-bold text-[#4E6654] block mb-1">⚖️ 屬性</span>
+              <p className="text-[#6B7A6E] text-xs leading-relaxed">{item.oilDetails?.attribute}</p>
+            </div>
+          </div>
+
+          <div className="bg-red-50/40 p-4 rounded-xl border border-red-200/40">
+            <span className="font-bold text-red-800 block mb-1 text-xs">⚠️ 注意事項</span>
+            <p className="text-red-700/90 text-xs leading-relaxed">{item.oilDetails?.caution}</p>
+          </div>
+
+          {/* 🩺 深度效能 */}
+          <div className="space-y-4 bg-[#F7F5F0]/60 p-4 rounded-xl border border-[#E5E0D8]/40">
+            <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-1 text-base">🩺 深度效能</span>
+            
+            <div>
+              <span className="font-bold text-[#4E6654] text-xs block mb-1">🧠 心靈療效：</span>
+              <div className="pl-2 border-l-2 border-[#A39284] text-xs">
+                {renderSmartParagraphs(item.oilDetails?.mindEffect, "mb-1.5 last:mb-0 text-[#6B7A6E]")}
+              </div>
+            </div>
+
+            <div>
+              <span className="font-bold text-[#4E6654] text-xs block mb-1">💪 身體療效：</span>
+              <div className="pl-2 border-l-2 border-[#A39284] text-xs">
+                {renderSmartParagraphs(item.oilDetails?.bodyEffect, "mb-1.5 last:mb-0 text-[#6B7A6E]")}
+              </div>
+            </div>
+
+            <div>
+              <span className="font-bold text-[#4E6654] text-xs block mb-1">🧴 皮膚療效：</span>
+              <div className="pl-2 border-l-2 border-[#A39284] text-xs">
+                {renderSmartParagraphs(item.oilDetails?.skinEffect, "mb-1.5 last:mb-0 text-[#6B7A6E]")}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
+            <div><span className="font-bold block text-xs">🔗 適合與之調和的精油</span><p className="text-[#6B7A6E] text-xs mt-0.5">{item.oilDetails?.blendingOils}</p></div>
+            <div className="mt-2"><span className="font-bold block text-xs">🧪 精油配方</span><p className="text-[#3A4F3F] font-medium text-xs mt-0.5">{item.oilDetails?.formulas}</p></div>
+            <div className="mt-2"><span className="font-bold block text-xs">🧴 按摩基底油</span><p className="text-[#6B7A6E] text-xs mt-0.5">{item.oilDetails?.carrierOils}</p></div>
+            
+            {/* 🚀 使用方法 */}
+            <div className="mt-2 border-t border-[#E5E0D8] pt-2">
+              <span className="font-bold block text-xs text-[#4E6654] mb-1.5">🚀 使用方法</span>
+              <div className="text-xs px-1">
+                {renderSmartParagraphs(item.oilDetails?.usage, "mb-2 last:mb-0 text-[#3A4F3F]")}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* 底部關閉按鈕 */}
         <div className="mt-8 pt-4 border-t border-[#F7F5F0] text-center">
-          <button onClick={onClose} className="px-6 py-2 bg-[#3A4F3F] hover:bg-[#2C3C30] text-white text-xs font-medium rounded-xl transition-all">
-            關閉詳細資訊
-          </button>
+          <button onClick={onClose} className="px-6 py-2 bg-[#3A4F3F] hover:bg-[#2C3C30] text-white text-xs font-medium rounded-xl transition-all">關閉並返回列表</button>
         </div>
       </div>
     </div>

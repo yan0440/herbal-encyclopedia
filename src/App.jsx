@@ -36,9 +36,7 @@ export default function App() {
           return (
             <mark 
               key={i} 
-              className="bg-[#F3E1C5] text-[#2C3C30] px-1 py-0.5 rounded-md font-bold mx-0.5 shadow-sm"
-              style={{ inlineSize: 'fit-content' }}
-            >
+              className="bg-[#F3E1C5] text-[#2C3C30] px-1 py-0.5 rounded-md font-bold mx-0.5 shadow-sm">
               {part.slice(2, -2)}
             </mark>
           );

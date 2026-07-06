@@ -4,14 +4,13 @@ export default function AcuModal({ item, onClose }) {
   if (!item) return null;
   const { acuTable, acuDetails } = item;
 
-  // 🧠 升級版智慧排版引擎：處理 \n 換行、多元清單編號、懸掛縮進、以及 **關鍵字加粗**
+  // 🧠 頂級視覺排版引擎：徹底為文字注入雜誌級質感，並物理性根除破格問題
   const renderFormattedText = (text, customClasses = "") => {
     if (!text) return null;
     
-    // 1. 支援標準 \n 與字串型態的 \\n 進行換行切割
     const lines = String(text).split(/\\n|\r?\n/);
 
-    // 2. 關鍵字粗體解析器：將 **文字** 轉換成加粗標籤，並加上精緻的草本微襯底
+    // 🔬 重點詞彙加粗解析：精緻草本微襯底
     const parseBoldSyntax = (str) => {
       const parts = str.split(/(\*\*.*?\*\*)/g);
       return parts.map((part, i) => {
@@ -19,7 +18,7 @@ export default function AcuModal({ item, onClose }) {
           return (
             <strong 
               key={i} 
-              className="font-bold text-[#2C3C30] bg-[#3A4F3F]/5 px-1.5 py-0.5 rounded mx-0.5 inline-block align-baseline"
+              className="font-bold text-[#2C3C30] bg-[#3A4F3F]/5 px-2 py-0.5 rounded-md mx-0.5 inline-block align-baseline font-sans text-[13px] tracking-normal"
             >
               {part.slice(2, -2)}
             </strong>
@@ -32,121 +31,146 @@ export default function AcuModal({ item, onClose }) {
     return lines
       .filter(line => line.trim() !== '')
       .map((line, index) => {
-        // 🔍 廣義清單開頭偵測：支援 1., 1), 一、, A., ①~⑲, •, -, *, ‣, ▪ 等多種符號
-        const isListItem = /^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])/.test(line.trim());
+        const trimmed = line.trim();
+        // 🔍 智慧偵測：精準分離各式編號、標點或黑點開頭
+        const listMatch = trimmed.match(/^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])\s*/);
+        
+        if (listMatch) {
+          const marker = listMatch[1];
+          const content = trimmed.substring(listMatch[0].length);
+          return (
+            // 🎯 Flex 雙軌並行：符號歸符號、文字歸文字，從物理上杜絕文字溢出外框！
+            <div key={index} className={`flex items-start gap-2.5 mb-2 last:mb-0 text-justify ${customClasses}`}>
+              <span className="font-bold text-[#4E6654] shrink-0 select-none font-sans mt-[2px]">{marker}</span>
+              <div className="flex-1 break-words leading-relaxed">{parseBoldSyntax(content)}</div>
+            </div>
+          );
+        }
         
         return (
           <p 
             key={index} 
-            // 🎯 懸掛縮進：如果是清單項目，第二行自動完美齊頭，絕不卡在符號下方
-            className={`text-justify leading-relaxed break-all mb-1.5 last:mb-0 ${isListItem ? 'pl-6 -indent-6' : ''} ${customClasses}`}
+            className={`text-justify leading-relaxed break-words mb-2 last:mb-0 ${customClasses}`}
           >
-            {parseBoldSyntax(line.trim())}
+            {parseBoldSyntax(trimmed)}
           </p>
         );
       });
   };
 
   return (
-    <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/30 text-sm" onClick={(e) => e.stopPropagation()}>
+    // 🎭 全面優化字體抗鋸齒 (antialiased) 與細緻字距 (tracking-wide)
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 z-50 antialiased tracking-wide" onClick={onClose}>
+      <div className="bg-[#FCFBFA] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/40 text-stone-700 text-[13.5px]" onClick={(e) => e.stopPropagation()}>
         
-        <button onClick={onClose} className="absolute top-5 right-5 text-[#A39284] hover:text-[#3A4F3F] text-xl">✕</button>
+        {/* ✕ 關閉按鈕 */}
+        <button onClick={onClose} className="absolute top-5 right-5 text-[#A39284] hover:text-[#3A4F3F] text-xl transition-colors">✕</button>
 
+        {/* 頂部優雅小標 */}
         <div className="mb-2">
-          <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-[#F0EDE6] text-[#3A4F3F]">{item.category}百科 · {item.tag}</span>
+          <span className="text-[11px] font-medium tracking-widest px-2.5 py-0.5 rounded-full bg-[#EAE7E0] text-[#5C6B5F] font-sans">
+            {item.category}百科 · {item.tag}
+          </span>
         </div>
 
-        <h2 className="text-3xl font-bold text-[#3A4F3F]">{item.name}</h2>
-        <p className="text-base italic tracking-wider text-[#A39284] mt-1 mb-6 font-mono border-b border-[#F7F5F0] pb-4">國際代碼: {acuTable.code}</p>
+        {/* 👑 標題改用具有典雅東方質感的襯線字體 (font-serif) */}
+        <h2 className="text-3xl font-bold font-serif text-[#2C3C30] tracking-wide mt-1">{item.name}</h2>
+        <p className="text-xs italic tracking-widest text-[#A39284] mt-1.5 mb-6 font-mono border-b border-[#E5E0D8]/40 pb-4">INTERNATIONAL CODE: {acuTable.code}</p>
 
-        {/* 📊 穴道專屬 4 項表格 */}
-        <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm">
+        {/* 📊 穴道專屬 4 項古典表格 */}
+        <div className="overflow-hidden border border-[#E5E0D8]/80 rounded-xl mb-8 shadow-[0_4px_16px_rgba(58,79,63,0.01)] bg-white">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#E5E0D8] text-[#3A4F3F] font-bold border-b border-[#E5E0D8]">
-                <th className="px-4 py-2.5 border-r border-[#D5CFC6]">穴名</th>
-                <th className="px-4 py-2.5 border-r border-[#D5CFC6]">別名</th>
-                <th className="px-4 py-2.5 border-r border-[#D5CFC6]">經絡</th>
-                <th className="px-4 py-2.5">國際代碼</th>
+              <tr className="bg-[#F0EDE6]/60 text-[#4E6654] font-bold text-xs tracking-widest border-b border-[#E5E0D8]/70">
+                <th className="px-4 py-3 border-r border-[#E5E0D8]/70">穴名</th>
+                <th className="px-4 py-3 border-r border-[#E5E0D8]/70">別名</th>
+                <th className="px-4 py-3 border-r border-[#E5E0D8]/70">經絡</th>
+                <th className="px-4 py-3">國際代碼</th>
               </tr>
             </thead>
-            <tbody className="text-[#3A4F3F] bg-white">
-              <tr>
-                <td className="px-4 py-3 font-bold border-r border-[#E5E0D8]">{acuTable.name}</td>
-                <td className="px-4 py-3 border-r border-[#E5E0D8] text-[#6B7A6E]">{acuTable.alias}</td>
-                <td className="px-4 py-3 border-r border-[#E5E0D8] font-medium">{acuTable.meridian}</td>
-                <td className="px-4 py-3 font-mono text-xs text-[#A39284]">{acuTable.code}</td>
+            <tbody className="text-[#3A4F3F]">
+              <tr className="divide-x divide-[#E5E0D8]/60">
+                <td className="px-4 py-3.5 font-bold font-serif text-base text-[#2C3C30]">{acuTable.name}</td>
+                <td className="px-4 py-3.5 text-[#6B7A6E] font-medium">{acuTable.alias || '—'}</td>
+                <td className="px-4 py-3.5 font-medium">{acuTable.meridian}</td>
+                <td className="px-4 py-3.5 font-mono text-xs text-[#A39284]">{acuTable.code}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* 📝 穴道表格下方 7 大內容 */}
-        <div className="space-y-5 text-[#3A4F3F]">
-          <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40">
-            <span className="font-bold text-[#4E6654] block mb-1.5 text-xs tracking-wider">🏷️ 類別</span>
-            <p className="text-[#3A4F3F] font-medium text-xs">{acuDetails.type}</p>
+        {/* 📝 內文區塊全面精緻化 */}
+        <div className="space-y-6">
+          <div className="bg-[#F4F2ED]/40 p-4 rounded-xl border border-[#E5E0D8]/50">
+            <span className="font-bold text-[#5C6B5F] block mb-1 text-xs tracking-widest font-sans">🏷️ 類別</span>
+            <p className="text-[#2C3C30] font-semibold text-xs">{acuDetails.type}</p>
           </div>
 
+          {/* 📖 釋名區域（安全包覆、絕不破格） */}
           <div>
-            <span className="font-bold text-[#4E6654] block mb-1 text-sm">📖 釋名</span>
-            <div className="text-[#6B7A6E] bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/30">
+            <span className="font-bold text-[#4E6654] block mb-2 text-xs tracking-widest font-sans">📖 釋名</span>
+            <div className="text-[#5C6B5F] bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]">
               {renderFormattedText(acuDetails.nameExpl)}
             </div>
           </div>
 
+          {/* 📍 位置 與 💀 解剖 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40 flex flex-col">
-              <span className="font-bold text-[#4E6654] block mb-1.5 text-xs">📍 位置</span>
-              <div className="text-[#6B7A6E] text-xs leading-relaxed flex-grow">
+              <span className="font-bold text-[#4E6654] block mb-2 text-xs tracking-widest font-sans">📍 位置</span>
+              <div className="text-[#5C6B5F] flex-grow">
                 {renderFormattedText(acuDetails.location)}
               </div>
             </div>
             <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40 flex flex-col">
-              <span className="font-bold text-[#4E6654] block mb-1.5 text-xs">💀 解剖</span>
-              <div className="text-[#6B7A6E] text-xs leading-relaxed flex-grow">
+              <span className="font-bold text-[#4E6654] block mb-2 text-xs tracking-widest font-sans">💀 解剖</span>
+              <div className="text-[#5C6B5F] flex-grow">
                 {renderFormattedText(acuDetails.anatomy)}
               </div>
             </div>
           </div>
 
-          <div className="bg-[#F7F5F0] p-4 rounded-xl border border-[#3A4F3F]/10">
-            <span className="font-bold text-[#3A4F3F] block mb-1.5 text-sm">🎯 操作</span>
-            <div className="text-[#6B7A6E] text-xs leading-relaxed">
+          {/* 🎯 操作 */}
+          <div className="bg-[#F5F2EC] p-4 rounded-xl border border-[#3A4F3F]/10">
+            <span className="font-bold text-[#3A4F3F] block mb-2 text-xs tracking-widest font-sans">🎯 操作</span>
+            <div className="text-[#5C6B5F]">
               {renderFormattedText(acuDetails.operation)}
             </div>
           </div>
 
-          {/* 功效（分古代、現代） */}
-          <div className="bg-white border border-[#E5E0D8] rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-[#F0EDE6] px-4 py-2 font-bold text-sm text-[#3A4F3F] border-b border-[#E5E0D8]">✨ 功效</div>
-            <div className="divide-y divide-[#E5E0D8]">
+          {/* ✨ 功效（古代、現代） */}
+          <div className="bg-white border border-[#E5E0D8]/80 rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(58,79,63,0.01)]">
+            <div className="bg-[#F0EDE6]/60 px-4 py-2.5 font-bold text-xs tracking-widest text-[#3A4F3F] border-b border-[#E5E0D8]/70 font-sans">✨ 功效</div>
+            <div className="divide-y divide-[#E5E0D8]/60">
               <div className="p-4">
-                <span className="font-bold text-[#A39284] text-xs block mb-1">【古代功效記載】</span>
-                <div className="text-[#6B7A6E] text-xs leading-relaxed">
+                <span className="font-bold text-[#A39284] text-[11px] tracking-wider block mb-2">【古代功效記載】</span>
+                <div className="text-[#5C6B5F]">
                   {renderFormattedText(acuDetails.effectAncient)}
                 </div>
               </div>
               <div className="p-4 bg-[#FBFBFA]">
-                <span className="font-bold text-[#4E6654] text-xs block mb-1">【現代臨床應用】</span>
-                <div className="text-[#3A4F3F] text-xs leading-relaxed font-medium">
+                <span className="font-bold text-[#4E6654] text-[11px] tracking-wider block mb-2">【現代臨床應用】</span>
+                <div className="text-[#2C3C30] font-medium">
                   {renderFormattedText(acuDetails.effectModern)}
                 </div>
               </div>
             </div>
           </div>
 
+          {/* 🔗 配穴 */}
           <div className="bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
-            <span className="font-bold block text-xs text-[#3A4F3F] mb-1">🔗 配穴</span>
-            <div className="text-[#6B7A6E] text-xs leading-relaxed">
+            <span className="font-bold block text-xs text-[#3A4F3F] tracking-widest mb-2 font-sans">🔗 配穴</span>
+            <div className="text-[#5C6B5F]">
               {renderFormattedText(acuDetails.matchingPoints)}
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-4 border-t border-[#F7F5F0] text-center">
-          <button onClick={onClose} className="px-6 py-2 bg-[#3A4F3F] hover:bg-[#2C3C30] text-white text-xs font-medium rounded-xl transition-all">關閉並返回列表</button>
+        {/* 底部按鈕 */}
+        <div className="mt-8 pt-4 border-t border-[#E5E0D8]/30 text-center">
+          <button onClick={onClose} className="px-6 py-2 bg-[#3A4F3F] hover:bg-[#2C3C30] text-white text-xs font-semibold rounded-xl tracking-widest transition-all shadow-md hover:shadow-lg">
+            關閉並返回列表
+          </button>
         </div>
       </div>
     </div>

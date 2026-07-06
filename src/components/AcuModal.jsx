@@ -4,7 +4,7 @@ export default function AcuModal({ item, onClose }) {
   if (!item) return null;
   const { acuTable, acuDetails } = item;
 
-  // 🧠 頂級視覺排版引擎：徹底根除負縮進，物理性防溢出，支援 \n 換行與 **粗體**
+  // 🧠 頂級視覺排版引擎：處理 \n 換行、多元清單、以及 **關鍵字加粗**
   const renderFormattedText = (text, customClasses = "") => {
     if (!text) return null;
     
@@ -32,14 +32,12 @@ export default function AcuModal({ item, onClose }) {
       .filter(line => line.trim() !== '')
       .map((line, index) => {
         const trimmed = line.trim();
-        // 🔍 智慧偵測多種符號與數字開頭
         const listMatch = trimmed.match(/^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])\s*/);
         
         if (listMatch) {
           const marker = listMatch[1];
           const content = trimmed.substring(listMatch[0].length);
           return (
-            // 🎯 Flex 雙軌並行：符號與文字拆開，徹底解決文字飛出框外的 Bug
             <div key={index} className={`flex items-start gap-2.5 mb-2 last:mb-0 text-justify ${customClasses}`}>
               <span className="font-bold text-[#4E6654] shrink-0 select-none font-sans mt-[2px]">{marker}</span>
               <div className="flex-1 break-words leading-relaxed">{parseBoldSyntax(content)}</div>
@@ -59,7 +57,6 @@ export default function AcuModal({ item, onClose }) {
   };
 
   return (
-    // 🎭 全面啟用極致抗鋸齒 (antialiased) 與視覺呼吸字距 (tracking-wide)
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 z-50 antialiased tracking-wide" onClick={onClose}>
       <div className="bg-[#FCFBFA] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/40 text-stone-700 text-[13.5px]" onClick={(e) => e.stopPropagation()}>
         
@@ -77,40 +74,33 @@ export default function AcuModal({ item, onClose }) {
         <h2 className="text-3xl font-bold font-serif text-[#2C3C30] tracking-wide mt-1">{item.name}</h2>
         <p className="text-xs italic tracking-widest text-[#A39284] mt-1.5 mb-6 font-mono border-b border-[#E5E0D8]/40 pb-4">INTERNATIONAL CODE: {acuTable.code}</p>
 
-        {/* 📊 最上方簡介大表格 */}
+        {/* 📊 最上方簡介大表格（已將穴名替換為主治功能） */}
         <div className="overflow-hidden border border-[#E5E0D8]/80 rounded-xl mb-8 shadow-[0_4px_16px_rgba(58,79,63,0.01)] bg-white">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-fixed">
             <thead>
               <tr className="bg-[#F0EDE6]/60 text-[#4E6654] font-bold text-xs tracking-widest border-b border-[#E5E0D8]/70">
-                <th className="px-4 py-3 border-r border-[#E5E0D8]/70">穴名</th>
+                {/* 給予主治功能較寬的配比 (w-1/2)，其餘平分 */}
+                <th className="w-1/2 px-4 py-3 border-r border-[#E5E0D8]/70">🩺 主治功能</th>
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">別名</th>
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">經絡</th>
                 <th className="px-4 py-3">國際代碼</th>
               </tr>
             </thead>
             <tbody className="text-[#3A4F3F]">
-              {/* 第一層：基礎 4 大核心數據 */}
-              <tr className="divide-x divide-[#E5E0D8]/60">
-                <td className="px-4 py-3.5 font-bold font-serif text-base text-[#2C3C30]">{acuTable.name}</td>
-                <td className="px-4 py-3.5 text-[#6B7A6E] font-medium">{acuTable.alias || '—'}</td>
-                <td className="px-4 py-3.5 font-medium">{acuTable.meridian}</td>
-                <td className="px-4 py-3.5 font-mono text-xs text-[#A39284]">{acuTable.code}</td>
-              </tr>
-              
-              {/* 第二層 🩺 新增：主治功能橫列（獨家融合在簡介表格底部） */}
-              <tr>
-                <td colSpan="4" className="px-4 py-4 bg-[#FBFBFA] border-t border-[#E5E0D8]/70 text-[#5C6B5F]">
-                  <span className="font-bold text-[#4E6654] block mb-2 text-xs tracking-widest font-sans">🩺 主治功能</span>
-                  <div className="text-[13px] leading-relaxed text-[#2C3C30]">
-                    {renderFormattedText(acuDetails.indications || item.indications || "未記載特定主治功能")}
-                  </div>
+              {/* 🎯 使用 align-top 確保內容多時，其餘小格依然整齊置頂 */}
+              <tr className="divide-x divide-[#E5E0D8]/60 align-top">
+                <td className="px-4 py-3.5 text-[13px] leading-relaxed text-[#2C3C30]">
+                  {renderFormattedText(acuDetails.indications || item.indications || "未記載特定主治功能")}
                 </td>
+                <td className="px-4 py-3.5 text-[#6B7A6E] font-medium break-words">{acuTable.alias || '—'}</td>
+                <td className="px-4 py-3.5 font-medium break-words">{acuTable.meridian}</td>
+                <td className="px-4 py-3.5 font-mono text-xs text-[#A39284] break-words">{acuTable.code}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* 📝 下方其餘詳細內容區塊 */}
+        {/* 📝 下方詳細內容區塊 */}
         <div className="space-y-6">
           {/* 🏷️ 類別 */}
           <div className="bg-[#F4F2ED]/40 p-4 rounded-xl border border-[#E5E0D8]/50">
@@ -118,10 +108,10 @@ export default function AcuModal({ item, onClose }) {
             <p className="text-[#2C3C30] font-semibold text-xs">{acuDetails.type}</p>
           </div>
 
-          {/* 📖 釋名區域（回歸原位！換上全新防溢出保護盒，絕對不再破格） */}
-          <div>
+          {/* 📖 釋名區域（安全待在原位，內嵌於獨立圓角盒子中） */}
+          <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]">
             <span className="font-bold text-[#4E6654] block mb-2 text-xs tracking-widest font-sans">📖 釋名</span>
-            <div className="text-[#5C6B5F] bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]">
+            <div className="text-[#5C6B5F]">
               {renderFormattedText(acuDetails.nameExpl)}
             </div>
           </div>

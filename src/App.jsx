@@ -26,11 +26,25 @@ export default function App() {
     const lines = String(text).split(/\\n|\r?\n/);
 
     // 🔬 多語意自動加粗解析器（強制瀏覽器內建加粗核心）
+    // 🔬 智慧排版引擎：全面支援 螢光筆(==)、粗體(**)、《書籍》、【標籤】、「詞彙」
     const parseBoldSyntax = (str) => {
-      // 自動捕捉 **...**, 《...》, 【...】, 「...」 四種模式
-      const parts = str.split(/(\*\*.*?\*\*|《.*?》|【.*?】|「.*?」)/g);
+      // 核心捕捉：加入了 (==.*?==) 螢光筆語法
+      const parts = str.split(/(\*\*.*?\*\*|==.*?==|《.*?》|【.*?】|「.*?」)/g);
+      
       return parts.map((part, i) => {
-        // 1. 手動標註的 **重點**
+        // 🎨 1. 螢光筆畫重點效果 (==重點內容==)
+        if (part.startsWith('==') && part.endsWith('==')) {
+          return (
+            <mark 
+              key={i} 
+              className="bg-[#F3E1C5] text-[#2C3C30] px-1 py-0.5 rounded-md font-bold mx-0.5 shadow-sm"
+              style={{ inlineSize: 'fit-content' }}
+            >
+              {part.slice(2, -2)}
+            </mark>
+          );
+        }
+        // 2. 自訂 **粗體**
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
             <strong key={i} className="text-[#1A261C]" style={{ fontWeight: 'bold' }}>
@@ -38,7 +52,7 @@ export default function App() {
             </strong>
           );
         }
-        // 2. 自動識別的 《書籍名》、 【配穴/功效標籤】、 「重點詞彙」
+        // 3. 自動識別 《書籍》、【標籤】、「詞彙」
         if (
           (part.startsWith('《') && part.endsWith('》')) ||
           (part.startsWith('【') && part.endsWith('】')) ||

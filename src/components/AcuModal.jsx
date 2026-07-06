@@ -74,27 +74,25 @@ export default function AcuModal({ item, onClose }) {
         <h2 className="text-3xl font-bold font-serif text-[#2C3C30] tracking-wide mt-1">{item.name}</h2>
         <p className="text-xs italic tracking-widest text-[#A39284] mt-1.5 mb-6 font-mono border-b border-[#E5E0D8]/40 pb-4">INTERNATIONAL CODE: {acuTable.code}</p>
 
-        {/* 📊 最上方簡介大表格（已將穴名替換為主治功能） */}
+        {/* 📊 最上方簡介大表格（已改回 table-auto 智慧調配寬度） */}
         <div className="overflow-hidden border border-[#E5E0D8]/80 rounded-xl mb-8 shadow-[0_4px_16px_rgba(58,79,63,0.01)] bg-white">
-          <table className="w-full text-left border-collapse table-fixed">
+          <table className="w-full text-left border-collapse table-auto">
             <thead>
               <tr className="bg-[#F0EDE6]/60 text-[#4E6654] font-bold text-xs tracking-widest border-b border-[#E5E0D8]/70">
-                {/* 給予主治功能較寬的配比 (w-1/2)，其餘平分 */}
-                <th className="w-1/2 px-4 py-3 border-r border-[#E5E0D8]/70">🩺 主治功能</th>
+                <th className="px-4 py-3 border-r border-[#E5E0D8]/70">🩺 主治功能</th>
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">別名</th>
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">經絡</th>
                 <th className="px-4 py-3">國際代碼</th>
               </tr>
             </thead>
             <tbody className="text-[#3A4F3F]">
-              {/* 🎯 使用 align-top 確保內容多時，其餘小格依然整齊置頂 */}
               <tr className="divide-x divide-[#E5E0D8]/60 align-top">
                 <td className="px-4 py-3.5 text-[13px] leading-relaxed text-[#2C3C30]">
                   {renderFormattedText(acuDetails.indications || item.indications || "未記載特定主治功能")}
                 </td>
-                <td className="px-4 py-3.5 text-[#6B7A6E] font-medium break-words">{acuTable.alias || '—'}</td>
-                <td className="px-4 py-3.5 font-medium break-words">{acuTable.meridian}</td>
-                <td className="px-4 py-3.5 font-mono text-xs text-[#A39284] break-words">{acuTable.code}</td>
+                <td className="px-4 py-3.5 text-[#6B7A6E] font-medium whitespace-nowrap">{acuTable.alias || '—'}</td>
+                <td className="px-4 py-3.5 font-medium whitespace-nowrap">{acuTable.meridian}</td>
+                <td className="px-4 py-3.5 font-mono text-xs text-[#A39284] whitespace-nowrap">{acuTable.code}</td>
               </tr>
             </tbody>
           </table>
@@ -102,13 +100,15 @@ export default function AcuModal({ item, onClose }) {
 
         {/* 📝 下方詳細內容區塊 */}
         <div className="space-y-6">
-          {/* 🏷️ 類別 */}
+          {/* 🏷️ 類別（✨ 字體大小與顏色已完美同步，維持排版一致性） */}
           <div className="bg-[#F4F2ED]/40 p-4 rounded-xl border border-[#E5E0D8]/50">
-            <span className="font-bold text-[#5C6B5F] block mb-1 text-xs tracking-widest font-sans">🏷️ 類別</span>
-            <p className="text-[#2C3C30] font-semibold text-xs">{acuDetails.type}</p>
+            <span className="font-bold text-[#5C6B5F] block mb-2 text-xs tracking-widest font-sans">🏷️ 類別</span>
+            <div className="text-[#5C6B5F]">
+              {renderFormattedText(acuDetails.type)}
+            </div>
           </div>
 
-          {/* 📖 釋名區域（安全待在原位，內嵌於獨立圓角盒子中） */}
+          {/* 📖 釋名區域 */}
           <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]">
             <span className="font-bold text-[#4E6654] block mb-2 text-xs tracking-widest font-sans">📖 釋名</span>
             <div className="text-[#5C6B5F]">

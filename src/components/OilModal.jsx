@@ -29,12 +29,12 @@ if (listMatch) {
   const marker = listMatch[1];
   const content = trimmed.substring(listMatch[0].length);
   return (
-    <div key={index} className={`flex items-start mb-1.5 ${customClasses}`}>
+    <div key={index} className={`flex items-start mb-1 ${customClasses}`}>
       {/* 將 w-6 改為 w-8 (增加寬度)
          text-right 確保括號不會貼邊
          pr-1 增加右側與內文的間距
       */}
-      <span className="shrink-0 font-bold w-8 text-[13px] pr-1 select-none text-[#6B7A6E]">
+      <span className="shrink-0 font-bold w-4 text-[13px] pr-7 select-none text-[#6B7A6E]">
         {marker}
       </span>
       <div className="flex-1 break-words text-[13px]">
@@ -83,7 +83,8 @@ return (
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E0D8] text-[#3A4F3F]">
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">植物種類/萃取部位</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.typePart)}</td></tr>
+    <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">別名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.alias)}</td></tr>
+  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">植物種類／萃取部位</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.typePart)}</td></tr>
   <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">萃取方法</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.method)}</td></tr>
   <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">拉丁學名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.latin)}</td></tr>
   <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.family)}</td></tr>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-// 🟢 請改成這樣：
-import { oilData } from "/src/data/oilData.js";
-import { acuData } from "/src/data/acuData.js";
+// 在 src/App.jsx 中
+import { oilData } from "./data/oilData.js";
+import { acuData } from "./data/acuData.js";
+import { parseBoldSyntax } from "./utils/formatUtils.jsx"; // App.jsx 不需要 ../ 因為它就在 src 下
 import OilModal from './components/OilModal';
 import AcuModal from './components/AcuModal';
 
@@ -20,54 +21,32 @@ export default function App() {
     return matchesSearch && matchesCategory;
   });
 
-  // 🧠 全域智慧排版引擎：完整 fail-safe 版本
   const renderFormattedText = (text) => {
     if (!text) return null;
-    
-    const lines = String(text).split(/\\n|\r?\n/);
 
-    // 🔬 確保正則表達式完全符合 Rust/Rolldown 編譯器標準
+    // 💡 將 parseBoldSyntax 放在這裡面，確保它在渲染時永遠存在
     const parseBoldSyntax = (str) => {
       const parts = str.split(/(\*\*.*?\*\*|==.*?==|《.*?》|【.*?】)/g);
       return parts.map((part, i) => {
-        // 1. 螢光筆畫重點 (==重點==)
         if (part.startsWith('==') && part.endsWith('==')) {
-          return (
-            <mark 
-              key={i} 
-              className="bg-[#F3E1C5] text-[#2C3C30] px-1 py-0.5 rounded-md font-bold mx-0.5 shadow-sm"
-            >
-              {part.slice(2, -2)}
-            </mark>
-          );
+          return <mark key={i} className="bg-[#F3E1C5] text-[#2C3C30] px-1 py-0.5 rounded-md font-bold mx-0.5">{part.slice(2, -2)}</mark>;
         }
-        // 2. 手動 **粗體**
         if (part.startsWith('**') && part.endsWith('**')) {
-          return (
-            <strong key={i} className="text-[#1A261C]" style={{ fontWeight: 'bold' }}>
-              {part.slice(2, -2)}
-            </strong>
-          );
+          return <strong key={i} className="text-[#1A261C] font-bold">{part.slice(2, -2)}</strong>;
         }
-        // 3. 自動識別 《書籍》與 【標籤】
-        if (
-          (part.startsWith('《') && part.endsWith('》')) ||
-          (part.startsWith('【') && part.endsWith('】'))
-        ) {
-          return (
-            <strong key={i} className="text-[#1A261C]" style={{ fontWeight: 'bold' }}>
-              {part}
-            </strong>
-          );
+        if ((part.startsWith('《') && part.endsWith('》')) || (part.startsWith('【') && part.endsWith('】'))) {
+          return <strong key={i} className="text-[#1A261C] font-bold">{part}</strong>;
         }
         return part;
       });
     };
 
+    const lines = String(text).split(/\\n|\r?\n/);
     return lines
       .filter(line => line.trim() !== '')
       .map((line, index) => {
         const trimmed = line.trim();
+        // 數字縮排檢測
         const listMatch = trimmed.match(/^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])\s*/);
         
         if (listMatch) {
@@ -75,14 +54,13 @@ export default function App() {
           const content = trimmed.substring(listMatch[0].length);
           return (
             <div key={index} className="flex items-start gap-2 mb-1 last:mb-0 text-justify text-sm text-[#6B7A6E]">
-              <span className="shrink-0 select-none mt-[1px]" style={{ fontWeight: 'bold' }}>{marker}</span>
-              <div className="flex-1 break-words leading-relaxed">{parseBoldSyntax(content)}</div>
+              <span className="shrink-0 font-bold w-6">{marker}</span>
+              <div className="flex-1 break-words">{parseBoldSyntax(content)}</div>
             </div>
           );
         }
-        
         return (
-          <p key={index} className="text-justify leading-relaxed break-words mb-1 last:mb-0 text-sm text-[#6B7A6E]">
+          <p key={index} className="text-justify break-words mb-1 last:mb-0 text-sm text-[#6B7A6E]">
             {parseBoldSyntax(trimmed)}
           </p>
         );

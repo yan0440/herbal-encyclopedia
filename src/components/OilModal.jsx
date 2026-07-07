@@ -75,24 +75,24 @@ return (
 
         {/* 📊 精油 11 項表格 */}
         <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm">
-          <table className="w-full text-[13px] border-collapse">
+          <table className="w-full text-[15px] border-collapse">
             <thead>
-              <tr className="bg-[#F0EDE6] text-[#3A4F3F] font-bold border-b border-[#E5E0D8] text-center">
+              <tr className="bg-[#F0EDE6] text-[#3A4F3F] font-bold border-b border-[#E5E0D8]">
                 <th className="px-4 py-2.5 w-1/3 border-r border-[#E5E0D8]">精油指標項目</th>
                 <th className="px-4 py-2.5">百科記載內容</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E0D8] text-[#3A4F3F]">
   <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">植物種類/萃取部位</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.typePart)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">萃取方法</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.method)}</td></tr>
+  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">萃取方法</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.method)}</td></tr>
   <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">拉丁學名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.latin)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.family)}</td></tr>
+  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.family)}</td></tr>
   <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">性味</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.nature)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.meridian)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.constitution)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.indications)}</td></tr>
+  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.meridian)}</td></tr>
+  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td><td className="text-left px-4 py-2">{renderFormattedText(item.oilTable?.constitution)}</td></tr>
+  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.indications)}</td></tr>
   <tr className="text-center"><td className="px-4 py-2 font-boldbg-[#FBFBFA] border-r border-[#E5E0D8]">類比音符</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.noteAnalogy)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.planet)}</td></tr>
+  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.planet)}</td></tr>
   <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">重要產地</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.origin)}</td></tr>
 </tbody>
           </table>

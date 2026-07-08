@@ -81,7 +81,7 @@ if (listMatch) {
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">主治</th>
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">別名</th>
                 <th className="px-4 py-3 border-r border-[#E5E0D8]/70">經絡</th>
-                <th className="px-4 py-3">代碼</th>
+                <th className="px-4 py-3">國際代碼</th>
               </tr>
             </thead>
             <tbody className="text-[#3A4F3F]">

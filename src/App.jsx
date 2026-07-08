@@ -15,8 +15,11 @@ export default function App() {
 
   const filteredData = encyclopediaData.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (item.tag && item.tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                          (item.englishName && item.englishName.toLowerCase().includes(searchQuery.toLowerCase()));
+                      (item.tag && item.tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                      (item.englishName && item.englishName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                      // 💡 新增這兩行來支援精油的標籤搜尋
+                      (item.constitutionTag && item.constitutionTag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                      (item.chemicalTag && item.chemicalTag.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory === '全部' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -86,7 +89,7 @@ export default function App() {
         />
 
         <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          {['全部', '精油', '穴位'].map((cat) => (
+          {['全部', '精油', '穴位',].map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat === '穴位' ? '穴道' : cat)}

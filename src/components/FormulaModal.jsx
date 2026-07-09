@@ -1,6 +1,6 @@
 import React from 'react';
 
-// 🟢 集中管理樣式：與 HerbModal 保持同步
+// 🟢 集中管理樣式：與其他 Modal 保持同步
 const UI = {
   text: "text-[15px] leading-8 text-[#6B7A6E]", 
   title: "text-4xl font-bold text-[#6B9080] mb-4",
@@ -8,7 +8,7 @@ const UI = {
   marker: "shrink-0 font-bold w-4 text-[13px] pr-7 select-none text-[#6B7A6E]"
 };
 
-// 輔助函式：處理粗體語法
+// 輔助函式：處理粗體與標記語法
 const parseBoldSyntax = (str) => {
   if (typeof str !== 'string') return str;
   const parts = str.split(/(\*\*.*?\*\*|==.*?==)/g);
@@ -22,27 +22,10 @@ const parseBoldSyntax = (str) => {
 export default function FormulaModal({ item, onClose }) {
   if (!item) return null;
 
-  // 🧠 嚴格對齊版排版引擎
+  // 🧠 精簡排版引擎：移除強制分段，確保內容靈活顯示
   const renderFormattedText = (text) => {
     if (!text) return <span className="italic text-gray-400">無記載</span>;
-    const lines = String(text).split(/\n/);
-    
-    return lines.filter(line => line.trim() !== '').map((line, index) => {
-      const trimmed = line.trim();
-      const listMatch = trimmed.match(/^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])\s*/);
-      
-      if (listMatch) {
-        const marker = listMatch[1];
-        const content = trimmed.substring(listMatch[0].length);
-        return (
-          <div key={index} className={`flex items-start mb-1 ${UI.text}`}>
-            <span className={UI.marker}>{marker}</span>
-            <div className="flex-1 break-words">{parseBoldSyntax(content)}</div>
-          </div>
-        );
-      }
-      return <div key={index} className={`${UI.text} mb-1`}>{parseBoldSyntax(trimmed)}</div>;
-    });
+    return <div className={`break-words ${UI.text}`}>{parseBoldSyntax(text)}</div>;
   };
 
   return (

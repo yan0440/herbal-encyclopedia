@@ -1,63 +1,31 @@
 import React from 'react';
 import { parseBoldSyntax } from "../utils/formatUtils.jsx";
 
-// 🟢 集中管理樣式：未來只需改動這裡，所有段落同步統一
+// 🟢 集中管理樣式：與其他模組同步
 const UI = {
-  // 將這裡的 14.5px 改成你想要的數值，例如 15px 或 16px
-  text: "text-[14px] leading-relaxed text-[#6B7A6E]", 
+  text: "text-[15px] leading-8 text-[#6B7A6E]", 
   title: "text-4xl font-bold text-[#6B9080]",
-  sectionLabel: "font-bold text-[#4E6654] block mb-1 text-base tracking-widest"
+  sectionLabel: "font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest"
 };
 
 export default function OilModal({ item, onClose }) {
   if (!item) return null;
 
-  // 🧠 嚴格對齊版排版引擎
+  // 🧠 精簡排版引擎：移除自動強制換行，確保文字流暢顯示
   const renderFormattedText = (text, customClasses = "") => {
     if (!text) return null;
-    const lines = String(text).split(/\\n|\r?\n/);
-    
-    return lines
-      .filter(line => line.trim() !== '')
-      .map((line, index) => {
-        const trimmed = line.trim();
-        // 偵測數字列表：例如 1.、一、(一) 等
-        const listMatch = trimmed.match(/^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])\s*/);
-        
-        // 🧠 修正後：更寬的 marker 容器，確保 (一)、(1) 不會被蓋住
-if (listMatch) {
-  const marker = listMatch[1];
-  const content = trimmed.substring(listMatch[0].length);
-  return (
-    <div key={index} className={`flex items-start mb-1 ${customClasses}`}>
-      {/* 將 w-6 改為 w-8 (增加寬度)
-         text-right 確保括號不會貼邊
-         pr-1 增加右側與內文的間距
-      */}
-      <span className="shrink-0 font-bold w-4 text-[13px] pr-7 select-none text-[#6B7A6E]">
-        {marker}
-      </span>
-      <div className="flex-1 break-words text-[13px]">
-        {parseBoldSyntax(content)}
+    return (
+      <div className={`${UI.text} ${customClasses} text-justify break-words`}>
+        {parseBoldSyntax(text)}
       </div>
-    </div>
-  );
-}
-        
-        // 檢查這裡有沒有其他的 inline style 或 class 覆寫了 UI.text
-return (
-  <p key={index} className={`${UI.text} text-justify ...`}>
-    {parseBoldSyntax(trimmed)}
-  </p>
-);
-      });
+    );
   };
 
   return (
     <div className="fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/30" onClick={(e) => e.stopPropagation()}>
         
-        <button onClick={onClose} className="absolute top-5 right-5 text-[#A39284] hover:text-[#3A4F3F] text-xl">✕</button>
+        <button onClick={onClose} className="absolute top-5 right-5 text-[#A39284] hover:text-[#3A4F3F] text-xl transition-colors">✕</button>
 
         <div className="mb-3 flex flex-wrap gap-1.5">
           <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#EAE7E0] text-[#6B7A6E]">
@@ -83,20 +51,20 @@ return (
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E0D8] text-[#3A4F3F]">
-    <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">別名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.alias)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">植物種類／萃取部位</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.typePart)}</td></tr>
-  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">萃取方法</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.method)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">拉丁學名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.latin)}</td></tr>
-  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.family)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">性味</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.nature)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">五行／陰陽屬性</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.property)}</td></tr>
-  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.meridian)}</td></tr>
-  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td><td className="text-left px-4 py-2">{renderFormattedText(item.oilTable?.constitution)}</td></tr>
-  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.indications)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">類比音符</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.noteAnalogy)}</td></tr>
-  <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.planet)}</td></tr>
-  <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">重要產地</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.origin)}</td></tr>
-</tbody>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">別名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.alias)}</td></tr>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">植物種類／萃取部位</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.typePart)}</td></tr>
+              <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">萃取方法</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.method)}</td></tr>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">拉丁學名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.latin)}</td></tr>
+              <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">科名</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.family)}</td></tr>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">性味</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.nature)}</td></tr>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">五行／陰陽屬性</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.property)}</td></tr>
+              <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">歸經</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.meridian)}</td></tr>
+              <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">適用體質</td><td className="text-left px-4 py-2">{renderFormattedText(item.oilTable?.constitution)}</td></tr>
+              <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主治功能</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.indications)}</td></tr>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">類比音符</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.noteAnalogy)}</td></tr>
+              <tr className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">主宰星球</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.planet)}</td></tr>
+              <tr className="text-center"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">重要產地</td><td className="px-4 py-2">{renderFormattedText(item.oilTable?.origin)}</td></tr>
+            </tbody>
           </table>
         </div>
 

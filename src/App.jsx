@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { oilData } from "./data/oilData.js";
 import { acuData } from "./data/acuData.js";
 import { herbData } from "./data/herbData.js";
@@ -8,41 +8,46 @@ import AcuModal from './components/AcuModal';
 import HerbModal from './components/HerbModal';
 import FormulaModal from './components/FormulaModal';
 import AddEntryModal from './components/AddEntryModal';
+import { db } from './firebase'; 
+import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 
 export default function App() {
-  const [data, setData] = useState(() => {
-    const saved = localStorage.getItem("myEncyclopedia");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [dbData, setDbData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [activeItem, setActiveItem] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
-  const addNewEntry = (newEntry) => {
-    const updatedData = [...data, { ...newEntry, id: Date.now() }];
-    setData(updatedData);
-    localStorage.setItem("myEncyclopedia", JSON.stringify(updatedData));
-  };
+  // 從 Firebase 即時獲取資料
+  useEffect(() => {
+  console.log("🔍 正在嘗試與 Firebase 建立連線...");
+  
+  const unsub = onSnapshot(collection(db, "entries"), (snapshot) => {
+    // 成功收到資料的回呼函式
+    const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log("✅ 成功連線到 Firebase！目前取得資料筆數：", entries.length);
+    setDbData(entries);
+  }, (error) => {
+    // 如果發生連線錯誤，這裡會印出原因
+    console.error("❌ Firebase 連線失敗，錯誤代碼：", error.code);
+    console.error("錯誤訊息：", error.message);
+  });
 
-  const updateEntry = (updatedEntry) => {
-    const updatedData = data.map(item => item.id === updatedEntry.id ? updatedEntry : item);
-    setData(updatedData);
-    localStorage.setItem("myEncyclopedia", JSON.stringify(updatedData));
-    setEditingItem(null);
-  };
-
-  const deleteEntry = (e, id) => {
+  return () => unsub();
+}, []);
+  const deleteEntry = async (e, id) => {
     e.stopPropagation();
     const password = prompt("請輸入管理員密碼：");
     if (password === "1234") {
-      const updatedData = data.filter(item => item.id !== id);
-      setData(updatedData);
-      localStorage.setItem("myEncyclopedia", JSON.stringify(updatedData));
-      alert("刪除成功");
-    } else {
-      alert(password === null ? "已取消刪除" : "密碼錯誤，請重新嘗試");
+      try {
+        await deleteDoc(doc(db, "entries", String(id)));
+        alert("刪除成功");
+      } catch (error) {
+        alert("刪除失敗");
+      }
+    } else if (password !== null) {
+      alert("密碼錯誤");
     }
   };
 
@@ -52,8 +57,11 @@ export default function App() {
     setIsAddModalOpen(true);
   };
 
-  const allEncyclopediaData = [...data, ...(oilData || []), ...(acuData || []), ...(herbData || []), ...(formulaData || [])];
-  const filteredData = allEncyclopediaData.filter(item => {
+  // 靜態資料 + 雲端資料合併計算
+  const staticData = [...(oilData || []), ...(acuData || []), ...(herbData || []), ...(formulaData || [])];
+  const allData = [...staticData, ...dbData];
+  
+  const filteredData = allData.filter(item => {
     if (!item || !item.name) return false;
     const query = searchQuery.toLowerCase();
     const matchesSearch = item.name.toLowerCase().includes(query) || (item.tag && item.tag.toLowerCase().includes(query)) || (item.englishName && item.englishName.toLowerCase().includes(query));
@@ -79,7 +87,6 @@ export default function App() {
       {isAddModalOpen && (
         <AddEntryModal 
           onClose={() => { setIsAddModalOpen(false); setEditingItem(null); }} 
-          onSave={editingItem ? updateEntry : addNewEntry} 
           editingItem={editingItem} 
         />
       )}
@@ -102,7 +109,6 @@ export default function App() {
                   </div>
                   <h3 className="text-2xl font-bold text-[#3A4F3F] group-hover:text-[#A39284]">{item.name}</h3>
                   <p className="text-sm italic text-[#A39284] mt-1 mb-4 font-serif">{item.category === "精油" ? item.englishName : (item.acuTable?.code || '')}</p>
-                  {/* 使用 whitespace-pre-line 保留你在 textarea 輸入的換行與編號格式 */}
                   <div className="text-sm text-[#6B7A6E] whitespace-pre-line leading-relaxed mb-4">{item.description}</div>
                 </div>
                 <div className="border-t border-[#F7F5F0] pt-4 flex justify-between items-center text-xs text-[#A39284]">

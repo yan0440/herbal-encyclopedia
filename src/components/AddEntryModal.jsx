@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { db } from '../firebase'; // 引入你的 Firebase 設定
+import { doc, setDoc } from 'firebase/firestore'; // 引入寫入功能
 
-export default function AddEntryModal({ onClose, onSave, editingItem }) {
+export default function AddEntryModal({ onClose, editingItem }) {
   const [formData, setFormData] = useState({ 
     category: '精油', name: '', tag: '', description: '', 
     englishName: '', constitutionTag: '', chemicalTag: '', 
     acuTable: { code: '', meridian: '', alias: '' },
-    acuDetails: { location: '', operation: '', indications: '' }
+    acuDetails: { location: '', operation: '', indications: '' },
+    oilTable: {},
+    oilDetails: {}
   });
 
   useEffect(() => {
@@ -14,24 +18,33 @@ export default function AddEntryModal({ onClose, onSave, editingItem }) {
     }
   }, [editingItem]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // 建立新 ID 或沿用舊 ID
+    const entryId = editingItem ? String(editingItem.id) : Date.now().toString();
+    
     const newEntry = {
       ...formData,
-      id: editingItem ? editingItem.id : Date.now(),
+      id: entryId,
       tag: formData.category === '穴道' ? (formData.acuTable?.meridian || '') : formData.tag,
       acuTable: formData.acuTable || { code: '', meridian: '', alias: '' },
       acuDetails: formData.acuDetails || { location: '', operation: '', indications: '' },
       oilTable: formData.oilTable || {},
       oilDetails: formData.oilDetails || {}
     };
-    onSave(newEntry);
-    onClose();
+
+    try {
+      // 存入 Firestore 的 'entries' 集合
+      await setDoc(doc(db, "entries", entryId), newEntry);
+      onClose();
+    } catch (error) {
+      console.error("寫入資料失敗: ", error);
+      alert("儲存失敗，請檢查網路連線");
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      {/* 透過 text-[15px] 與 leading-8 設定全域字體大小與行距 */}
-      <div className="bg-white p-8 rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto text-[15px] leading-3">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white p-8 rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto text-[15px]" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-xl font-bold mb-4 text-[#3A4F3F]">新增百科資料</h2>
         
         <select className="w-full mb-4 p-2 border rounded" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>

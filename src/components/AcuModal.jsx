@@ -1,9 +1,8 @@
 import React from 'react';
 import { parseBoldSyntax } from "../utils/formatUtils.jsx";
 
-// 🟢 集中管理樣式：未來只需改動這裡，所有段落同步統一
+// 🟢 集中管理樣式：調整此處即可全域同步
 const UI = {
-  // 將這裡的 14.5px 改成你想要的數值，例如 15px 或 16px
   text: "text-[14px] leading-relaxed text-[#6B7A6E]", 
   title: "text-4xl font-bold text-[#6B9080]",
   sectionLabel: "font-bold text-[#4E6654] block mb-1 text-base tracking-widest"
@@ -12,50 +11,17 @@ const UI = {
 export default function AcuModal({ item, onClose }) {
   if (!item) return null;
   
-  // 🛡️ 安全鎖：如果 acuDetails 不存在，給它一個預設值，避免讀取屬性時報錯
   const acuTable = item.acuTable || {};
   const acuDetails = item.acuDetails || {};
 
-  // 🧠 嚴格對齊版排版引擎：修正 w-6 固定寬度與間距
-  const renderFormattedText = (text, customClasses = "") => {
+  // 🧠 嚴格對齊版排版引擎：處理傳入的文字顯示
+  const renderFormattedText = (text) => {
     if (!text) return null;
-    const lines = String(text).split(/\\n|\r?\n/);
-    
-    return lines
-      .filter(line => line.trim() !== '')
-      .map((line, index) => {
-        const trimmed = line.trim();
-        const listMatch = trimmed.match(/^((?:\d+|[一二三四五六七八九十A-Za-z]+)[.、)]|[\u2460-\u2473]|[-•*‣▪])\s*/);
-        
-        // 🧠 修正後：更寬的 marker 容器，確保 (一)、(1) 不會被蓋住
-if (listMatch) {
-  const marker = listMatch[1];
-  const content = trimmed.substring(listMatch[0].length);
-  return (
-    <div key={index} className={`flex items-start mb-1.5 ${customClasses}`}>
-      {/* 將 w-6 改為 w-8 (增加寬度)
-         text-right 確保括號不會貼邊
-         pr-1 增加右側與內文的間距
-      */}
-      <span className="shrink-0 font-bold w-3.5 text-right pr-1.5 select-none text-[#6B7A6E]">
-        {marker}
-      </span>
-      <div className="flex-1 break-words text-justify">
-        {parseBoldSyntax(content)}
-      </div>
-    </div>
-  );
-}
-        
-        return (
-          <p key={index} className={`text-justify break-words mb-1.5 last:mb-0 ${customClasses}`}>
-            {parseBoldSyntax(trimmed)}
-          </p>
-        );
-      });
+    // 移除自動強制換行邏輯，直接顯示內容
+    return <div className="text-justify break-words">{parseBoldSyntax(text)}</div>;
   };
 
- return (
+  return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-[#FCFBFA] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative border border-[#E5E0D8]/40" onClick={(e) => e.stopPropagation()}>
         
@@ -125,37 +91,33 @@ if (listMatch) {
               </div>
              )}
           </div>
+
           {/* 🎯 操作 */}
-<div className="bg-[#F5F2EC] p-4 rounded-xl border border-[#3A4F3F]/10">
-  <span className={UI.sectionLabel}>🎯 操作</span>
-  <div className={UI.text}>
-    {renderFormattedText(acuDetails?.operation || "未記載操作說明")}
-  </div>
-</div>
+          <div className="bg-[#F5F2EC] p-4 rounded-xl border border-[#3A4F3F]/10">
+            <span className={UI.sectionLabel}>🎯 操作</span>
+            <div className={UI.text}>{renderFormattedText(acuDetails?.operation || "未記載操作說明")}</div>
+          </div>
 
-{/* ✨ 功效 */}
-<div className="bg-white border border-[#E5E0D8]/80 rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(58,79,63,0.01)]">
-  <div className="bg-[#F0EDE6]/60 px-4 py-2.5 font-bold text-[15px] tracking-widest text-[#3A4F3F] border-b border-[#E5E0D8]/70">✨ 功效</div>
-  <div className="divide-y divide-[#E5E0D8]/60">
-    <div className="p-4">
-      <span className="font-bold text-[#4E6654] text-[13px] tracking-wider block mb-2">【古代功效記載】</span>
-      <div className={UI.text}>{renderFormattedText(acuDetails?.effectAncient || "未記載")}</div>
-    </div>
-    <div className="p-4 bg-[#FBFBFA]">
-      <span className="font-bold text-[#4E6654] text-[13px] tracking-wider block mb-2">【現代臨床應用】</span>
-      <div className={UI.text}>{renderFormattedText(acuDetails?.effectModern || "未記載")}</div>
-    </div>
-  </div>
-</div>
+          {/* ✨ 功效 */}
+          <div className="bg-white border border-[#E5E0D8]/80 rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(58,79,63,0.01)]">
+            <div className="bg-[#F0EDE6]/60 px-4 py-2.5 font-bold text-[15px] tracking-widest text-[#3A4F3F] border-b border-[#E5E0D8]/70">✨ 功效</div>
+            <div className="divide-y divide-[#E5E0D8]/60">
+              <div className="p-4">
+                <span className="font-bold text-[#4E6654] text-[13px] tracking-wider block mb-2">【古代功效記載】</span>
+                <div className={UI.text}>{renderFormattedText(acuDetails?.effectAncient || "未記載")}</div>
+              </div>
+              <div className="p-4 bg-[#FBFBFA]">
+                <span className="font-bold text-[#4E6654] text-[13px] tracking-wider block mb-2">【現代臨床應用】</span>
+                <div className={UI.text}>{renderFormattedText(acuDetails?.effectModern || "未記載")}</div>
+              </div>
+            </div>
+          </div>
 
-{/* 🔗 配穴 */}
-<div className="bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
-  <span className={UI.sectionLabel}>🔗 配穴</span>
-  <div className={UI.text}>
-    {renderFormattedText(acuDetails?.matchingPoints || "未記載配穴資訊")}
-  </div>
-</div>
-          {/* 其他區塊以此類推... */}
+          {/* 🔗 配穴 */}
+          <div className="bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
+            <span className={UI.sectionLabel}>🔗 配穴</span>
+            <div className={UI.text}>{renderFormattedText(acuDetails?.matchingPoints || "未記載配穴資訊")}</div>
+          </div>
         </div>
 
         <div className="mt-8 pt-4 border-t border-[#E5E0D8]/30 text-center">

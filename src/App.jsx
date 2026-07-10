@@ -10,6 +10,7 @@ import FormulaModal from './components/FormulaModal';
 import AddEntryModal from './components/AddEntryModal';
 import { db } from './firebase'; 
 import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function App() {
   const [dbData, setDbData] = useState([]);

@@ -61,7 +61,7 @@ export const oilData = [
       indications: "催產",
       noteAnalogy: "低音",
       planet: "太陽",
-      origin: "匈牙利、波蘭、比利時、荷蘭、法國"
+      origin: "匈牙利、波蘭、比利時、荷蘭、法國、英國"
     },
     oilDetails: {
       scent: "甜甜的藥草香，略帶麝香味。",

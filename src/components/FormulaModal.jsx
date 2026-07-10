@@ -65,9 +65,10 @@ export default function FormulaModal({ item, onClose }) {
         )}
 
         <div className="bg-white rounded-xl border border-[#E5E0D8] p-6 mb-6">
-          <div className="text-sm text-[#6B7A6E] space-y-2">
+          <div className="grid grid-cols-2 gap-4 text-sm text-[#6B7A6E]">
+            <p><strong>類別：</strong> {item.tag || item.category || '無記載'}</p>
             <p><strong>來源：</strong> {item.source || '無記載'}</p>
-            <p><strong>功效：</strong> {item.effect || '無記載'}</p>
+            <p className="col-span-2"><strong>功效：</strong> {item.effect || '無記載'}</p>
           </div>
         </div>
 

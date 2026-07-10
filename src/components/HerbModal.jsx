@@ -1,19 +1,15 @@
 import React from 'react';
 
-// 🟢 集中管理樣式：與其他 Modal 保持同步
 const UI = {
   text: "text-[15px] leading-8 text-[#6B7A6E]", 
   title: "text-4xl font-bold text-[#6B9080] mb-4",
   sectionLabel: "font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest",
-  marker: "shrink-0 font-bold w-4 text-[15px] pr-7 select-none text-[#6B7A6E]"
 };
 
-// 🟢 同步 App.jsx 的智慧解析邏輯
 const parseBoldSyntax = (str) => {
   if (typeof str !== 'string') return str;
   const boldKeywords = ['肌肉', '神經', '血管'];
   const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|肌肉|神經|血管)/g;
-
   return str.split('\n').map((line, lineIndex) => (
     <span key={lineIndex} className="block mb-1">
       {line.split(regex).map((part, i) => {
@@ -33,13 +29,11 @@ const parseBoldSyntax = (str) => {
 export default function HerbModal({ item, onClose }) {
   if (!item) return null;
 
-  // 🧠 精簡排版引擎
   const renderFormattedText = (text) => {
     if (!text) return <span className="italic text-gray-400">無記載</span>;
     return <div className={`break-words ${UI.text}`}>{parseBoldSyntax(text)}</div>;
   };
 
-  // 🟢 定義與列表頁同步的分類預設提醒
   const categoryAlerts = {
     '中藥': "本資料庫的內容僅供學術參考，不作商業用途。有病請尋求合法的醫師，非中醫師請勿擅自處方服藥。",
     '方劑': "本資料庫的內容僅供學術參考，不作商業用途。有病請尋求合法的醫師，非中醫師請勿擅自處方服藥。"
@@ -56,20 +50,18 @@ export default function HerbModal({ item, onClose }) {
 
         <h2 className={UI.title}>{item.name}</h2>
 
-        {item.intro && (
-          <div className="bg-[#F7F5F0] p-4 rounded-xl border border-[#E5E0D8] mb-4 text-[#6B7A6E] italic text-sm">
-            {item.intro}
-          </div>
-        )}
-        
-        <div className="bg-white rounded-xl border border-[#E5E0D8] p-6 mb-6">
-          <div className="grid grid-cols-2 gap-4 text-sm text-[#6B7A6E]">
-            <p className="col-span-2"><strong>別名：</strong> {item.alias || '無記載'}</p>
-            <p><strong>科屬：</strong> {item.family || '無記載'}</p>
-            <p><strong>類別：</strong> {item.category || '無記載'}</p>
-            <p className="col-span-2"><strong>性味歸經：</strong> {item.nature || '無記載'}</p>
-          </div>
-        </div>
+        {/* 這裡調整了顯示結構，使其與你手動輸入的資訊格式一致 */}
+<div className="bg-white rounded-xl border border-[#E5E0D8] p-6 mb-6">
+  <div className="grid grid-cols-2 gap-4 text-sm text-[#6B7A6E]">
+    <p className="col-span-2"><strong>別名：</strong> {item.alias || '無記載'}</p>
+    <p><strong>科屬：</strong> {item.family || '無記載'}</p>
+    
+    {/* 修改此處：優先顯示標籤，若無標籤則顯示預設類別 */}
+    <p><strong>類別：</strong> {item.tag || item.category || '無記載'}</p>
+    
+    <p className="col-span-2"><strong>性味歸經：</strong> {item.nature || '無記載'}</p>
+  </div>
+</div>
 
         <div className="space-y-6 text-[#3A4F3F]">
           {[

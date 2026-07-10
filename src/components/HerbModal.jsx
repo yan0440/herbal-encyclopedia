@@ -9,7 +9,7 @@ const UI = {
 const parseBoldSyntax = (str) => {
   if (typeof str !== 'string') return str;
   const boldKeywords = ['肌肉', '神經', '血管'];
-  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|肌肉|神經|血管)/g;
+  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|)/g;
   return str.split('\n').map((line, lineIndex) => (
     <span key={lineIndex} className="block mb-1">
       {line.split(regex).map((part, i) => {
@@ -52,15 +52,13 @@ export default function HerbModal({ item, onClose }) {
 
         {/* 這裡調整了顯示結構，使其與你手動輸入的資訊格式一致 */}
 <div className="bg-white rounded-xl border border-[#E5E0D8] p-6 mb-6">
-  <div className="grid grid-cols-2 gap-4 text-sm text-[#6B7A6E]">
-    <p className="col-span-2"><strong>別名：</strong> {item.alias || '無記載'}</p>
-    <p><strong>科屬：</strong> {item.family || '無記載'}</p>
-    
-    {/* 修改此處：優先顯示標籤，若無標籤則顯示預設類別 */}
-    <p><strong>類別：</strong> {item.tag || item.category || '無記載'}</p>
-    
-    <p className="col-span-2"><strong>性味歸經：</strong> {item.nature || '無記載'}</p>
-  </div>
+  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-[#6B7A6E]">
+  <p><strong>別名：</strong> {item.alias || '無記載'}</p>
+  <p><strong>類別：</strong> {item.tag || item.category || '無記載'}</p>
+  <p className="col-span-2"><strong>科屬：</strong> {item.family || '無記載'}</p>
+  <p><strong>性味：</strong> {item.nature || '無記載'}</p>
+  <p><strong>歸經：</strong> {item.meridian || '無記載'}</p>
+</div>
 </div>
 
         <div className="space-y-6 text-[#3A4F3F]">

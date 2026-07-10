@@ -12,7 +12,7 @@ const UI = {
 const parseBoldSyntax = (str) => {
   if (typeof str !== 'string') return str;
   const boldKeywords = ['肌肉', '神經', '血管'];
-  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|肌肉|神經|血管)/g;
+  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|)/g;
 
   return str.split('\n').map((line, lineIndex) => (
     <span key={lineIndex} className="block mb-1">

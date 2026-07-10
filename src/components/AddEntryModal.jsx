@@ -126,6 +126,7 @@ export default function AddEntryModal({ onClose, editingItem }) {
             </div>
             <textarea placeholder="製法用量" value={formData.preparation || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, preparation: e.target.value})} />
             <textarea placeholder="主治" value={formData.indications || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, indications: e.target.value})} />
+            <textarea placeholder="文獻別錄" value={formData.literature || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, literature: e.target.value})} />
             <textarea placeholder="方義" value={formData.analysis || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, analysis: e.target.value})} />
             <textarea placeholder="方論" value={formData.discussion || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, discussion: e.target.value})} />
             <textarea placeholder="辨證要點" value={formData.syndrome || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, syndrome: e.target.value})} />

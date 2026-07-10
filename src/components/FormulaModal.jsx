@@ -72,6 +72,7 @@ export default function FormulaModal({ item, onClose }) {
           {[
             { label: '製法用量', val: item.preparation },
             { label: '主治', val: item.indications },
+            { label: '文獻別錄', val: item.literature },
             { label: '方義分析', val: item.analysis },
             { label: '方論', val: item.discussion },
             { label: '辨證要點', val: item.syndrome },

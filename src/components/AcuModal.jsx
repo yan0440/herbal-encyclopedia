@@ -121,11 +121,30 @@ export default function AcuModal({ item, onClose }) {
               </div>
              )}
              {acuDetails?.anatomy && (
-              <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40">
-                <span className={UI.sectionLabel}>💀 解剖</span>
-                <div className={UI.text}>{renderFormattedText(acuDetails.anatomy)}</div>
-              </div>
-             )}
+  <div className="bg-[#FBFBFA] p-4 rounded-xl border border-[#E5E0D8]/40">
+    <span className={UI.sectionLabel}>💀 解剖</span>
+    <div className={UI.text}>
+      {acuDetails.anatomy.split('\n').map((line, i) => {
+        // 直接判斷開頭，不依賴切割，這是最穩定的方式
+        const isBoldLine = line.startsWith('肌肉') || line.startsWith('神經') || line.startsWith('血管');
+        
+        if (isBoldLine) {
+            const colonIndex = line.indexOf('：'); // 檢查是否有中文冒號
+            const label = line.substring(0, colonIndex);
+            const content = line.substring(colonIndex);
+            
+            return (
+                <div key={i} className="mb-1">
+                    <strong className="text-[#3A4F3F] !font-bold">{label}</strong>
+                    <span>{content}</span>
+                </div>
+            );
+        }
+        return <div key={i} className="mb-1">{line}</div>;
+      })}
+    </div>
+  </div>
+)}
           </div>
 
           {/* 🎯 操作 */}

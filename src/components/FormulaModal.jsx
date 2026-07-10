@@ -9,25 +9,31 @@ const UI = {
 };
 
 // 🟢 同步 App.jsx 的智慧解析邏輯
+// 修改 parseBoldSyntax 函式，加入 ● 轉縮排的邏輯
 const parseBoldSyntax = (str) => {
   if (typeof str !== 'string') return str;
   const boldKeywords = ['肌肉', '神經', '血管'];
-  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|)/g;
+  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|肌肉|神經|血管)/g;
 
-  return str.split('\n').map((line, lineIndex) => (
-    <span key={lineIndex} className="block mb-1">
-      {line.split(regex).map((part, i) => {
-        if (!part) return null;
-        if (part.startsWith('==') && part.endsWith('==')) 
-          return <mark key={i} className="bg-[#F3E1C5] px-1 rounded">{part.slice(2, -2)}</mark>;
-        if ((part.startsWith('**') && part.endsWith('**')) || boldKeywords.includes(part)) 
-          return <strong key={i} className="text-[#3A4F3F]">{part.replace(/\*\*/g, '')}</strong>;
-        if (part.match(/^[【《\(].*[】》\)]$/)) 
-          return <span key={i} className="text-[#6B9080] font-medium">{part}</span>;
-        return part;
-      })}
-    </span>
-  ));
+  return str.split('\n').map((line, lineIndex) => {
+    const isIndented = line.trim().startsWith('●');
+    const cleanLine = isIndented ? line.replace('●', '', '•').trim() : line;
+
+    return (
+      <span key={lineIndex} className={`block mb-1 ${isIndented ? 'ml-6' : ''}`}>
+        {cleanLine.split(regex).map((part, i) => {
+          if (!part) return null;
+          if (part.startsWith('==') && part.endsWith('==')) 
+            return <mark key={i} className="bg-[#F3E1C5] px-1 rounded">{part.slice(2, -2)}</mark>;
+          if ((part.startsWith('**') && part.endsWith('**')) || boldKeywords.includes(part)) 
+            return <strong key={i} className="text-[#3A4F3F]">{part.replace(/\*\*/g, '')}</strong>;
+          if (part.match(/^[【《\(].*[】》\)]$/)) 
+            return <span key={i} className="text-[#6B9080] font-medium">{part}</span>;
+          return part;
+        })}
+      </span>
+    );
+  });
 };
 
 export default function FormulaModal({ item, onClose }) {

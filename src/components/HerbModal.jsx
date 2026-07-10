@@ -5,7 +5,7 @@ const UI = {
   text: "text-[15px] leading-8 text-[#6B7A6E]", 
   title: "text-4xl font-bold text-[#6B9080] mb-4",
   sectionLabel: "font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest",
-  marker: "shrink-0 font-bold w-4 text-[13px] pr-7 select-none text-[#6B7A6E]"
+  marker: "shrink-0 font-bold w-4 text-[15px] pr-7 select-none text-[#6B7A6E]"
 };
 
 // 🟢 同步 App.jsx 的智慧解析邏輯

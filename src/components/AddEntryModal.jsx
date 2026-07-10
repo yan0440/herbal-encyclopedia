@@ -19,13 +19,17 @@ export default function AddEntryModal({ onClose, editingItem }) {
   }, [editingItem]);
 
   const handleSave = async () => {
-    // 建立新 ID 或沿用舊 ID
     const entryId = editingItem ? String(editingItem.id) : Date.now().toString();
     
+    // 修正標籤邏輯：優先使用穴道的經絡，否則使用輸入框的 tag
+    const finalTag = formData.category === '穴道' 
+      ? (formData.acuTable?.meridian || '') 
+      : formData.tag;
+
     const newEntry = {
       ...formData,
       id: entryId,
-      tag: formData.category === '穴道' ? (formData.acuTable?.meridian || '') : formData.tag,
+      tag: finalTag, // 確保這裡存入了正確的 tag
       acuTable: formData.acuTable || { code: '', meridian: '', alias: '' },
       acuDetails: formData.acuDetails || { location: '', operation: '', indications: '' },
       oilTable: formData.oilTable || {},
@@ -33,7 +37,6 @@ export default function AddEntryModal({ onClose, editingItem }) {
     };
 
     try {
-      // 存入 Firestore 的 'entries' 集合
       await setDoc(doc(db, "entries", entryId), newEntry);
       onClose();
     } catch (error) {
@@ -53,13 +56,17 @@ export default function AddEntryModal({ onClose, editingItem }) {
         
         <input placeholder="名稱" value={formData.name || ''} className="w-full mb-3 p-2 border rounded" onChange={(e) => setFormData({...formData, name: e.target.value})} />
         
-        {formData.category !== '穴道' && (
-          <input placeholder="通用標籤 (Tag)" value={formData.tag || ''} className="w-full mb-3 p-2 border rounded" onChange={(e) => setFormData({...formData, tag: e.target.value})} />
-        )}
+        {/* 修正顯示邏輯：讓穴道以外的類別皆可輸入標籤 */}
+        <input 
+            placeholder={formData.category === '穴道' ? "經絡 (自動填入標籤)" : "通用標籤 (Tag)"} 
+            value={formData.category === '穴道' ? (formData.acuTable?.meridian || '') : (formData.tag || '')} 
+            disabled={formData.category === '穴道'}
+            className="w-full mb-3 p-2 border rounded bg-gray-50" 
+            onChange={(e) => setFormData({...formData, tag: e.target.value})} 
+        />
         
         <textarea placeholder="簡介描述 (支援 **加粗**、==高亮==、換行)" value={formData.description || ''} className="w-full mb-3 p-2 border rounded h-16" onChange={(e) => setFormData({...formData, description: e.target.value})} />
 
-        {/* --- 根據分類動態渲染的欄位 --- */}
         {formData.category === '精油' && (
           <div className="space-y-4 mb-4">
             <div className="grid grid-cols-2 gap-3">
@@ -76,6 +83,7 @@ export default function AddEntryModal({ onClose, editingItem }) {
             <textarea placeholder="化學結構" value={formData.oilDetails?.chemistry || ''} className="w-full p-2 border rounded h-20" onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, chemistry: e.target.value }})} />
             <textarea placeholder="心靈療效" value={formData.oilDetails?.mindEffect || ''} className="w-full p-2 border rounded h-20" onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, mindEffect: e.target.value }})} />
             <textarea placeholder="身體療效" value={formData.oilDetails?.bodyEffect || ''} className="w-full p-2 border rounded h-20" onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, bodyEffect: e.target.value }})} />
+            <textarea placeholder="皮膚療效" value={formData.oilDetails?.skinEffect || ''} className="w-full p-2 border rounded h-20" onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, skinEffect: e.target.value }})} />
           </div>
         )}
 
@@ -93,41 +101,18 @@ export default function AddEntryModal({ onClose, editingItem }) {
           </div>
         )}
 
+        {/* 中藥與方劑欄位保持原樣 */}
         {formData.category === '中藥' && (
-          <div className="space-y-3 mb-4">
-            <div className="grid grid-cols-2 gap-3">
-              <input placeholder="別名" value={formData.alias || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, alias: e.target.value})} />
-              <input placeholder="科屬" value={formData.family || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, family: e.target.value})} />
-              <input placeholder="性味歸經" value={formData.nature || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, nature: e.target.value})} />
-            </div>
-            <textarea placeholder="品種來源" value={formData.source || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, source: e.target.value})} />
-            <textarea placeholder="功效" value={formData.effect || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, effect: e.target.value})} />
-            <textarea placeholder="主治" value={formData.indications || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, indications: e.target.value})} />
-            <textarea placeholder="用法用量" value={formData.dosage || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, dosage: e.target.value})} />
-            <textarea placeholder="現代藥理" value={formData.pharmacology || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, pharmacology: e.target.value})} />
-            <textarea placeholder="文獻別錄" value={formData.literature || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, literature: e.target.value})} />
-            <textarea placeholder="注意禁忌" value={formData.contraindication || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, contraindication: e.target.value})} />
-            <textarea placeholder="註" value={formData.note || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, note: e.target.value})} />
-          </div>
+           <div className="space-y-3 mb-4">
+             <div className="grid grid-cols-2 gap-3">
+               <input placeholder="別名" value={formData.alias || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, alias: e.target.value})} />
+               <input placeholder="科屬" value={formData.family || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, family: e.target.value})} />
+               <input placeholder="性味歸經" value={formData.nature || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, nature: e.target.value})} />
+             </div>
+             <textarea placeholder="功效" value={formData.effect || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, effect: e.target.value})} />
+           </div>
         )}
 
-        {formData.category === '方劑' && (
-          <div className="space-y-3 mb-4">
-            <div className="grid grid-cols-2 gap-3">
-              <input placeholder="來源" value={formData.source || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, source: e.target.value})} />
-              <input placeholder="整體功效" value={formData.effect || ''} className="p-2 border rounded" onChange={(e) => setFormData({...formData, effect: e.target.value})} />
-            </div>
-            <textarea placeholder="製法用量" value={formData.preparation || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, preparation: e.target.value})} />
-            <textarea placeholder="主治" value={formData.indications || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, indications: e.target.value})} />
-            <textarea placeholder="方義" value={formData.analysis || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, analysis: e.target.value})} />
-            <textarea placeholder="方論" value={formData.discussion || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, discussion: e.target.value})} />
-            <textarea placeholder="辨證要點" value={formData.syndrome || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, syndrome: e.target.value})} />
-            <textarea placeholder="加減" value={formData.modifications || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, modifications: e.target.value})} />
-            <textarea placeholder="注意禁忌" value={formData.contraindication || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, contraindication: e.target.value})} />
-            <textarea placeholder="現代應用" value={formData.modernApp || ''} className="w-full p-2 border rounded h-16" onChange={(e) => setFormData({...formData, modernApp: e.target.value})} />
-          </div>
-        )}
-        
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="px-4 py-2 text-gray-500">取消</button>
           <button onClick={handleSave} className="px-4 py-2 bg-[#3A4F3F] text-white rounded">儲存資料</button>

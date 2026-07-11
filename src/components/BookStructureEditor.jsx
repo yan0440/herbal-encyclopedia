@@ -8,7 +8,7 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
         <div>
           <label className={labelClass}>作者 / 編著</label>
           <input 
-            placeholder="例如：黃帝內經" 
+            placeholder="例如：黃帝（託名）" 
             value={formData.bookDetails?.author || ''} 
             className={inputClass} 
             onChange={(e) => setFormData({
@@ -35,7 +35,7 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
             }}
             className="w-full py-3 bg-[#6B9080] text-white rounded-xl font-bold hover:bg-[#5A7B6D] transition-colors shadow-sm"
           >
-            ＋ 新增主目錄
+            ＋ 新增主目錄（如：素問、內科症狀）
           </button>
         </div>
       </div>
@@ -85,8 +85,8 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
 
                 return (
                   <div key={child.id} className="bg-white p-3 rounded-xl border border-[#E5E0D8] space-y-2">
-                    {/* 這裡加上 items-stretch 確保子元件高度填滿並對齊 */}
-                    <div className="flex gap-2 items-stretch">
+                    {/* 外層加強 w-full 並採用 flex 調配元件比例 */}
+                    <div className="flex gap-4 items-stretch w-full">
                       <select
                         value={child.type}
                         className="text-xs p-1 bg-[#F7F5F0] rounded border border-[#E5E0D8] shrink-0 self-center h-8"
@@ -100,11 +100,11 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
                         <option value="folder">📁 子目錄</option>
                       </select>
 
-                      {/* 1. 項目主名稱輸入框 */}
+                      {/* 1. 項目主名稱輸入框：改為 flex-2 或 flex-1，確保與別名平分秋色，絕對不被推擠 */}
                       <input
-                        placeholder={child.type === 'folder' ? "子目錄名稱（如：卷一）" : "篇名（如：上古天真論）"}
+                        placeholder={child.type === 'folder' ? "子目錄名稱（如：卷一）" : "項目/篇章名稱（如：上古天真論、發熱）"}
                         value={pureTitle}
-                        className="flex-1 text-sm px-1.5 border-b border-[#E5E0D8] shrink-0 self-center h-8"
+                        className="flex-[2] text-sm px-1.5 border-b border-[#E5E0D8] outline-none h-8 min-w-0"
                         onChange={(e) => {
                           const newPureTitle = e.target.value;
                           const updated = [...formData.bookDetails.chapters];
@@ -115,14 +115,13 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
                         }}
                       />
 
-                      {/* 🟢 2. 全新升級：與名稱完全一致的底線風格別名格 */}
+                      {/* 🟢 2. 優化後的別名格：移除多餘提示，採用 flex-1 彈性寬度，緊貼在名稱右邊且絕不遮擋左邊 */}
                       {child.type === 'content' && (
-                        <div className="flex items-center gap-1 shrink-0 border-b border-[#E5E0D8] h-8">
-                          <span className="text-sm text-[#A39284] whitespace-nowrap">別名：</span>
+                        <div className="flex-1 flex items-center border-b border-[#E5E0D8] h-8 px-1 min-w-0">
                           <input
-                            placeholder="如：養生總綱"
+                            placeholder="（別名，如：不欲食、無飢餓感）"
                             value={aliasText}
-                            className="w-24 md:w-36 text-sm bg-transparent outline-none text-[#3A4F3F] placeholder-[#A39284]/60 h-full"
+                            className="w-full text-sm bg-transparent outline-none text-[#6B9080] placeholder-[#A39284]/50 h-full"
                             onChange={(e) => {
                               const newAlias = e.target.value;
                               const updated = [...formData.bookDetails.chapters];
@@ -156,7 +155,7 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
                           <button
                             type="button"
                             onClick={() => {
-                              const template = "【概念】\n\n【辨證分析】\n\n【文獻別錄】\n\n【現代研究】\n\n【診斷辨證分析】\n";
+                              const template = "【概念】\n\n\n【辨證分析】\n\n\n【文獻別錄】\n\n\n【現代研究】\n\n\n【診斷辨證分析】\n\n";
                               const updated = [...formData.bookDetails.chapters];
                               updated[index].children[childIdx].text = template + (child.text || '');
                               setFormData({ ...formData, bookDetails: { ...formData.bookDetails, chapters: updated } });

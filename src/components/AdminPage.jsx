@@ -8,8 +8,8 @@ export default function AdminPage({ allData, onBack }) {
   const [isAuth, setIsAuth] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [viewingItem, setViewingItem] = useState(null);
   
-  // 版本號狀態
   const [version, setVersion] = useState("v1.2.7");
 
   useEffect(() => {
@@ -19,11 +19,9 @@ export default function AdminPage({ allData, onBack }) {
       .catch(() => setVersion("v1.2.7"));
   }, []);
 
-  // 分類篩選狀態
   const [filterCategory, setFilterCategory] = useState('全部');
   const categories = ['全部', '書籍', '精油', '穴道', '中藥', '方劑'];
   
-  // 過濾資料邏輯
   const filteredEntries = filterCategory === '全部' 
     ? allData 
     : allData.filter(item => item.category === filterCategory);
@@ -45,10 +43,20 @@ export default function AdminPage({ allData, onBack }) {
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] py-12 px-6">
+      {/* 新增/編輯 Modal */}
       {isAddModalOpen && (
         <AddEntryModal 
           onClose={() => { setIsAddModalOpen(false); setEditingItem(null); }} 
           editingItem={editingItem} 
+        />
+      )}
+
+      {/* 檢視用的 Modal */}
+      {viewingItem && (
+        <AddEntryModal 
+          editingItem={viewingItem} 
+          isViewOnly={true} 
+          onClose={() => setViewingItem(null)} 
         />
       )}
 
@@ -64,7 +72,6 @@ export default function AdminPage({ allData, onBack }) {
           </div>
         </header>
 
-        {/* 分類篩選標籤 */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {categories.map(cat => (
             <button 
@@ -86,24 +93,9 @@ export default function AdminPage({ allData, onBack }) {
                   <span className="font-semibold text-[#3A4F3F]">{item.name}</span>
                 </div>
                 <div className="flex gap-2">
-                  <button 
-                    onClick={() => window.open(`/entry/${item.id}`, '_blank')} 
-                    className="px-3 py-1.5 text-xs font-medium text-[#A39284] hover:text-[#3A4F3F] transition"
-                  >
-                    檢視
-                  </button>
-                  <button 
-                    onClick={() => { setEditingItem(item); setIsAddModalOpen(true); }} 
-                    className="px-3 py-1.5 text-xs font-medium text-[#6B9080] hover:bg-[#6B9080]/10 rounded-lg transition"
-                  >
-                    編輯
-                  </button>
-                  <button 
-                    onClick={async () => { if(confirm('確定刪除「' + item.name + '」？')) await deleteDoc(doc(db, "entries", item.id)); }} 
-                    className="px-3 py-1.5 text-xs font-medium text-[#D4A373] hover:bg-[#D4A373]/10 rounded-lg transition"
-                  >
-                    刪除
-                  </button>
+                  <button onClick={() => setViewingItem(item)} className="px-3 py-1.5 text-xs font-medium text-[#A39284] hover:text-[#3A4F3F] transition">檢視</button>
+                  <button onClick={() => { setEditingItem(item); setIsAddModalOpen(true); }} className="px-3 py-1.5 text-xs font-medium text-[#6B9080] hover:bg-[#6B9080]/10 rounded-lg transition">編輯</button>
+                  <button onClick={async () => { if(confirm('確定刪除「' + item.name + '」？')) await deleteDoc(doc(db, "entries", item.id)); }} className="px-3 py-1.5 text-xs font-medium text-[#D4A373] hover:bg-[#D4A373]/10 rounded-lg transition">刪除</button>
                 </div>
               </div>
             ))

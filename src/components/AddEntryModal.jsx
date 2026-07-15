@@ -3,16 +3,15 @@ import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore'; 
 import BookStructureEditor from './BookStructureEditor';
 
-
-export default function AddEntryModal({ onClose, editingItem }) {
+export default function AddEntryModal({ onClose, editingItem, isViewOnly = false }) {
   const [formData, setFormData] = useState({ 
     category: '精油', name: '', tag: '', description: '', 
     englishName: '', constitutionTag: '', chemicalTag: '', 
     acuTable: { code: '', meridian: '', alias: '' },
     acuDetails: { location: '', operation: '', indications: '', type: '', nameExpl: '', anatomy: '', effectAncient: '', effectModern: '', matchingPoints: '' },
     oilTable: {}, oilDetails: {},
-    bookDetails: { author: '', chapters: [] } // 🟢 新增書籍專用欄位
-});
+    bookDetails: { author: '', chapters: [] } 
+  });
 
   useEffect(() => {
     if (editingItem) setFormData(editingItem);
@@ -21,7 +20,6 @@ export default function AddEntryModal({ onClose, editingItem }) {
   const handleSave = async () => {
     if (!formData.name) return alert("請至少填寫名稱！");
     const entryId = editingItem ? String(editingItem.id) : Date.now().toString();
-    // 統一確保儲存時 tag 欄位有值，這裡同時儲存 category 以利顯示
     const newEntry = { ...formData, id: entryId };
 
     try {
@@ -34,7 +32,7 @@ export default function AddEntryModal({ onClose, editingItem }) {
     }
   };
 
-  const inputClass = "w-full px-4 py-3 bg-[#FCFBFA] border border-[#E5E0D8]/60 rounded-xl focus:ring-2 focus:ring-[#3A4F3F]/10 focus:border-[#3A4F3F] outline-none transition-all duration-300";
+  const inputClass = `w-full px-4 py-3 bg-[#FCFBFA] border border-[#E5E0D8]/60 rounded-xl focus:ring-2 focus:ring-[#3A4F3F]/10 focus:border-[#3A4F3F] outline-none transition-all duration-300 ${isViewOnly ? 'opacity-70 cursor-not-allowed' : ''}`;
   const labelClass = "text-[11px] font-fttf text-[#A39284] uppercase tracking-widest mb-1.5 block";
   const textareaClass = `${inputClass} h-24`;
 
@@ -43,55 +41,55 @@ export default function AddEntryModal({ onClose, editingItem }) {
       <div className="bg-[#FCFBFA] p-8 rounded-3xl w-full max-w-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto border border-[#E5E0D8]/50" onClick={(e) => e.stopPropagation()}>
         
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-[#E5E0D8]/40">
-          <h2 className="text-3xl font-fttf text-[#3A4F3F]">新增百科資料</h2>
+          <h2 className="text-3xl font-fttf text-[#3A4F3F]">{isViewOnly ? "資料檢視" : "新增/編輯百科資料"}</h2>
           <button onClick={onClose} className="text-[#A39284] hover:text-[#3A4F3F] text-2xl transition-colors">✕</button>
         </div>
         
         <div className="space-y-6">
-          {/* 1. 分類與名稱放在第一排 */}
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className={labelClass}>分類</label>
-<select className={inputClass} value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
-  <option value="書籍">書籍</option>
-  <option value="精油">精油</option>
-  <option value="穴道">穴道</option>
-  <option value="中藥">中藥</option>
-  <option value="方劑">方劑</option>
-</select>
+              <select disabled={isViewOnly} className={inputClass} value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+                <option value="書籍">書籍</option>
+                <option value="精油">精油</option>
+                <option value="穴道">穴道</option>
+                <option value="中藥">中藥</option>
+                <option value="方劑">方劑</option>
+              </select>
             </div>
             <div>
               <label className={labelClass}>名稱</label>
-              <input placeholder="輸入名稱" value={formData.name || ''} className={inputClass} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+              <input disabled={isViewOnly} placeholder="輸入名稱" value={formData.name || ''} className={inputClass} onChange={(e) => setFormData({...formData, name: e.target.value})} />
             </div>
           </div>
           
-          {/* 2. 簡介描述：獨立出來，佔滿全寬 (w-full) */}
           <div className="w-full">
             <label className={labelClass}>簡介描述</label>
             <textarea 
+              disabled={isViewOnly}
               placeholder="簡介描述" 
               value={formData.description || ''} 
               className={textareaClass} 
               onChange={(e) => setFormData({...formData, description: e.target.value})} 
             />
           </div>
-            {formData.category !== '穴道' && (
-  <div className="mb-4">
-            <label className={labelClass}>核心標籤</label><input placeholder="例如：解表、清熱" value={formData.tag || ''} className={inputClass} onChange={(e) => setFormData({...formData, tag: e.target.value})} />
-            
-          </div>
-          
-)}
-          {/* 2. 在原本的位置直接替換成這樣，極度乾淨！ */}
-{formData.category === '書籍' && (
-  <BookStructureEditor 
-    formData={formData}
-    setFormData={setFormData}
-    labelClass={labelClass}
-    inputClass={inputClass}
-  />
-)}
+
+          {formData.category !== '穴道' && (
+            <div className="mb-4">
+              <label className={labelClass}>核心標籤</label>
+              <input disabled={isViewOnly} placeholder="例如：解表、清熱" value={formData.tag || ''} className={inputClass} onChange={(e) => setFormData({...formData, tag: e.target.value})} />
+            </div>
+          )}
+
+          {formData.category === '書籍' && (
+            <BookStructureEditor 
+              formData={formData}
+              setFormData={setFormData}
+              labelClass={labelClass}
+              inputClass={inputClass}
+              disabled={isViewOnly}
+            />
+          )}
           {formData.category === '精油' && (
           <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
             <input placeholder="別名" value={formData.alias || ''} className={inputClass} onChange={(e) => setFormData({...formData, alias: e.target.value})} />
@@ -182,8 +180,14 @@ export default function AddEntryModal({ onClose, editingItem }) {
         </div>
         
         <div className="flex justify-end gap-4 mt-10 pt-6 border-t border-[#E5E0D8]/40">
-          <button onClick={onClose} className="px-8 py-3 text-[#A39284] font-fttf hover:text-[#3A4F3F] transition-colors">取消</button>
-          <button onClick={handleSave} className="px-10 py-3 bg-[#3A4F3F] text-white rounded-2xl font-fttf hover:bg-[#2C3C30] shadow-xl shadow-[#3A4F3F]/20 transition-all">儲存資料</button>
+          <button onClick={onClose} className="px-8 py-3 text-[#A39284] font-fttf hover:text-[#3A4F3F] transition-colors">
+            {isViewOnly ? "關閉" : "取消"}
+          </button>
+          {!isViewOnly && (
+            <button onClick={handleSave} className="px-10 py-3 bg-[#3A4F3F] text-white rounded-2xl font-fttf hover:bg-[#2C3C30] shadow-xl shadow-[#3A4F3F]/20 transition-all">
+              儲存資料
+            </button>
+          )}
         </div>
       </div>
     </div>

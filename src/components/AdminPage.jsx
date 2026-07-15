@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import AddEntryModal from './AddEntryModal';
+import ViewEntryModal from './ViewEntryModal';
 
 export default function AdminPage({ allData, onBack }) {
   const [password, setPassword] = useState('');
@@ -9,8 +10,8 @@ export default function AdminPage({ allData, onBack }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [viewingItem, setViewingItem] = useState(null);
-  
   const [version, setVersion] = useState("v1.2.7");
+  const [filterCategory, setFilterCategory] = useState('全部');
 
   useEffect(() => {
     fetch('/version.json')
@@ -19,7 +20,6 @@ export default function AdminPage({ allData, onBack }) {
       .catch(() => setVersion("v1.2.7"));
   }, []);
 
-  const [filterCategory, setFilterCategory] = useState('全部');
   const categories = ['全部', '書籍', '精油', '穴道', '中藥', '方劑'];
   
   const filteredEntries = filterCategory === '全部' 
@@ -43,7 +43,7 @@ export default function AdminPage({ allData, onBack }) {
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] py-12 px-6">
-      {/* 新增/編輯 Modal */}
+      {/* 新增/編輯 Modal 控制 */}
       {isAddModalOpen && (
         <AddEntryModal 
           onClose={() => { setIsAddModalOpen(false); setEditingItem(null); }} 
@@ -51,11 +51,10 @@ export default function AdminPage({ allData, onBack }) {
         />
       )}
 
-      {/* 檢視用的 Modal */}
+      {/* 檢視專用 Modal 控制 */}
       {viewingItem && (
-        <AddEntryModal 
-          editingItem={viewingItem} 
-          isViewOnly={true} 
+        <ViewEntryModal 
+          item={viewingItem} 
           onClose={() => setViewingItem(null)} 
         />
       )}
@@ -89,7 +88,7 @@ export default function AdminPage({ allData, onBack }) {
             filteredEntries.map(item => (
               <div key={item.id} className="bg-white p-5 rounded-2xl border border-[#E5E0D8]/60 flex justify-between items-center shadow-sm hover:border-[#6B9080]/30 transition-all">
                 <div>
-                  <span className="text-[10px] font-bold text-[#6B9080] bg-[#6B9080]/10 px-2 py-0.5 rounded mr-3">{item.category}</span>
+                  <span className="text-[10px] font-bold text-[#6B9080] bg-[#6B9080]/10 px-2 py-0.5 rounded mr-3 uppercase">{item.category}</span>
                   <span className="font-semibold text-[#3A4F3F]">{item.name}</span>
                 </div>
                 <div className="flex gap-2">

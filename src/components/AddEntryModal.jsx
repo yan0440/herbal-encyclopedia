@@ -41,7 +41,9 @@ export default function AddEntryModal({ onClose, editingItem, isViewOnly = false
       <div className="bg-[#FCFBFA] p-8 rounded-3xl w-full max-w-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] max-h-[90vh] overflow-y-auto border border-[#E5E0D8]/50" onClick={(e) => e.stopPropagation()}>
         
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-[#E5E0D8]/40">
-          <h2 className="text-3xl font-fttf text-[#3A4F3F]">{isViewOnly ? "資料檢視" : "新增/編輯百科資料"}</h2>
+          <h2 className="text-3xl font-fttf text-[#3A4F3F]">
+  {isViewOnly ? `檢視：${formData.name || '百科資料'}` : (editingItem ? "編輯百科資料" : "新增百科資料")}
+</h2>
           <button onClick={onClose} className="text-[#A39284] hover:text-[#3A4F3F] text-2xl transition-colors">✕</button>
         </div>
         

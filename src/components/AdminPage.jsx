@@ -10,7 +10,7 @@ export default function AdminPage({ allData, onBack }) {
   const [editingItem, setEditingItem] = useState(null);
   
   // 版本號狀態
-  const [version, setVersion] = useState("v1.2.6");
+  const [version, setVersion] = useState("v1.2.7");
 
   // 若要使用動態 Git 版本，請取消下面 useEffect 的註解
   useEffect(() => {

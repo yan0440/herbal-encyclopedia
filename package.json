@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "build": "react-scripts build",
-  "start": "react-scripts start"
-},
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",
     "firebase": "^12.16.0",
@@ -26,6 +28,7 @@
     "globals": "^17.7.0",
     "postcss": "^8.5.16",
     "tailwindcss": "^4.3.2",
+    "typescript": "^7.0.2",
     "vite": "^8.1.1"
   }
 }

@@ -5,12 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "react-scripts build",
     "lint": "eslint .",
     "preview": "vite preview",
     "prebuild": "node generate-version.js",
-  "start": "node generate-version.js && react-scripts start",
-  "build": "react-scripts build"
+  "start": "node generate-version.js && react-scripts start"
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",

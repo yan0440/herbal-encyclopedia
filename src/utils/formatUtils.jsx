@@ -7,6 +7,8 @@ export const parseBoldSyntax = (str) => {
   const parts = str.split(/(\*\*.*?\*\*|==.*?==|《.*?》|【.*?】)/g);
   
   return parts.map((part, i) => {
+    if (!part) return null;
+    
     if (part.startsWith('==') && part.endsWith('==')) {
       return <mark key={i} className="bg-[#F3E1C5] text-[#2C3C30] px-1 py-0.5 rounded-md font-bold mx-0.5 shadow-sm">{part.slice(2, -2)}</mark>;
     }
@@ -27,4 +29,20 @@ export const parseBoldSyntax = (str) => {
 
     return part;
   });
+};
+
+export const renderFormattedText = (text, customClasses = "") => {
+  if (!text) return <span className="italic text-gray-400">無記載</span>;
+  
+  const lines = typeof text === 'string' ? text.split('\n').filter(l => l.trim() !== '') : [text];
+  
+  return (
+    <div className={`text-[15px] leading-8 text-[#6B7A6E] ${customClasses}`}>
+      {lines.map((line, i) => (
+        <div key={i} className="mb-1">
+          {typeof line === 'string' ? parseBoldSyntax(line) : line}
+        </div>
+      ))}
+    </div>
+  );
 };

@@ -95,7 +95,8 @@ export default function AddEntryModal({ onClose, editingItem, isViewOnly = false
             />
           )}
           {formData.category === '精油' && (
-          <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
+  <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
+            <input placeholder="中醫體質標籤" value={formData.constitutionTag || ''} className="col-span-2 p-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={(e) => setFormData({...formData, constitutionTag: e.target.value})} />
             <input placeholder="別名" value={formData.alias || ''} className={inputClass} onChange={(e) => setFormData({...formData, alias: e.target.value})} />
             <input placeholder="植物種類／萃取部位" value={formData.typePart || ''} className={inputClass} onChange={(e) => setFormData({...formData, typePart: e.target.value})} />
             <input placeholder="萃取方法" value={formData.method || ''} className={inputClass} onChange={(e) => setFormData({...formData, method: e.target.value})} />
@@ -103,24 +104,25 @@ export default function AddEntryModal({ onClose, editingItem, isViewOnly = false
             <input placeholder="學名" value={formData.latin || ''} className={inputClass} onChange={(e) => setFormData({...formData, latin: e.target.value})} />
             <input placeholder="科名" value={formData.family || ''} className={inputClass} onChange={(e) => setFormData({...formData, family: e.target.value})} />
             <input placeholder="性味" value={formData.oilDetails?.nature || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, nature: e.target.value }})} />
-            <input placeholder="五行/陰陽" value={formData.oilDetails?.fiveElements || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, fiveElements: e.target.value }})} />
+            <input placeholder="五行/陰陽屬性" value={formData.oilDetails?.property || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, property: e.target.value }})} />
             <input placeholder="歸經" value={formData.oilDetails?.meridian || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, meridian: e.target.value }})} />
             <input placeholder="通用體質" value={formData.oilDetails?.constitution || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, constitution: e.target.value }})} />
-            <input placeholder="類比音符" value={formData.oilDetails?.note || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, note: e.target.value }})} />
+            <input placeholder="主治功能" value={formData.oilDetails?.indications || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, indications: e.target.value }})} />
+            <input placeholder="類比音符" value={formData.oilDetails?.noteAnalogy || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, noteAnalogy: e.target.value }})} />
             <input placeholder="主宰星球" value={formData.oilDetails?.planet || ''} className={inputClass} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, planet: e.target.value }})} />
             <input placeholder="重要產地" value={formData.oilTable?.origin || ''} className="col-span-2 p-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={(e) => setFormData({...formData, oilTable: { ...formData.oilTable, origin: e.target.value }})} />
             <input placeholder="屬性" value={formData.chemicalTag || ''} className="col-span-2 p-3 bg-gray-50 border border-gray-200 rounded-xl" onChange={(e) => setFormData({...formData, chemicalTag: e.target.value})} />
             <textarea placeholder="🔍 氣味" value={formData.oilDetails?.scent || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, scent: e.target.value }})} />
             <textarea placeholder="✨ 外觀描述" value={formData.oilDetails?.appearance || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, appearance: e.target.value }})} />
-            <textarea placeholder="📜 應用歷史與相關神話" value={formData.oilDetails?.history || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, history: e.target.value }})} />
+            <textarea placeholder="📜 應用歷史與相關神話" value={formData.oilDetails?.historyMyth || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, historyMyth: e.target.value }})} />
             <textarea placeholder="🔬 化學結構" value={formData.oilDetails?.chemistry || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, chemistry: e.target.value }})} />
             <textarea placeholder="⚖️ 屬性" value={formData.oilDetails?.attribute || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, attribute: e.target.value }})} />
-            <textarea placeholder="⚠️ 注意事項" value={formData.oilDetails?.precautions || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, precautions: e.target.value }})} />
+            <textarea placeholder="⚠️ 注意事項" value={formData.oilDetails?.caution|| ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, caution: e.target.value }})} />
             <textarea placeholder="🧠 心靈療效" value={formData.oilDetails?.mindEffect || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, mindEffect: e.target.value }})} />
             <textarea placeholder="💪 身體療效" value={formData.oilDetails?.bodyEffect || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, bodyEffect: e.target.value }})} />
             <textarea placeholder="🧴 皮膚療效" value={formData.oilDetails?.skinEffect || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, skinEffect: e.target.value }})} />
-            <textarea placeholder="🔗 適合與之調和的精油" value={formData.oilDetails?.blending || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, blending: e.target.value }})} />
-            <textarea placeholder="🧪 精油配方" value={formData.oilDetails?.formula || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, formula: e.target.value }})} />
+            <textarea placeholder="🔗 適合與之調和的精油" value={formData.oilDetails?.blendingOils || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, blendingOils: e.target.value }})} />
+            <textarea placeholder="🧪 精油配方" value={formData.oilDetails?.formulas || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, formulas: e.target.value }})} />
             <textarea placeholder="🧴 按摩基底油" value={formData.oilDetails?.carrierOil || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, carrierOil: e.target.value }})} />
             <textarea placeholder="🚀 使用方法" value={formData.oilDetails?.usage || ''} className={`${inputClass} col-span-2 h-16`} onChange={(e) => setFormData({...formData, oilDetails: { ...formData.oilDetails, usage: e.target.value }})} />
           </div>

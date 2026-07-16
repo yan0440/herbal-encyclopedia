@@ -1,7 +1,5 @@
 import React from 'react';
 import { parseBoldSyntax } from "../utils/formatUtils.jsx";
-// 在 BookModal.jsx 和 FormulaModal.jsx 中修改：
-// 修改後 (正確)
 import PreviewRenderer from "./PreviewRenderer";
 
 const UI = {
@@ -13,9 +11,11 @@ const UI = {
 export default function FormulaModal({ item, onClose }) {
   if (!item) return null;
 
+  // 將渲染邏輯定義在組件內部，確保可以直接使用外部匯入的 parseBoldSyntax
   const renderFormattedText = (text) => {
     if (!text) return <span className="italic text-gray-400">無記載</span>;
     const lines = typeof text === 'string' ? text.split('\n').filter(l => l.trim() !== '') : [text];
+    
     return (
       <div className={UI.text}>
         {lines.map((line, i) => {
@@ -46,7 +46,6 @@ export default function FormulaModal({ item, onClose }) {
     );
   };
 
-  const introText = item.intro || item.description || item.summary;
   const alertContent = item.alert || (['中藥', '方劑'].includes(item.category) ? "本資料庫的內容僅供學術參考，不作商業用途。有病請尋求合法的醫師，非中醫師請勿擅自處方服藥。" : "");
 
   return (
@@ -61,7 +60,7 @@ export default function FormulaModal({ item, onClose }) {
 
         <h2 className={UI.title}>{item.name}</h2>
 
-        {/* 2. 類別資訊框 */}
+        {/* 類別資訊框 */}
         <div className="bg-white rounded-xl border border-[#E5E0D8] p-6 mb-6">
           <div className="grid grid-cols-2 gap-4 text-sm text-[#6B7A6E]">
             <p><strong>類別：</strong> {item.tag || item.category || '無記載'}</p>
@@ -70,7 +69,7 @@ export default function FormulaModal({ item, onClose }) {
           </div>
         </div>
 
-        {/* 3. 主要內容 */}
+        {/* 主要內容 */}
         <div className="space-y-6 text-[#3A4F3F]">
           {[
             { label: '製法用量', val: item.preparation },
@@ -91,7 +90,7 @@ export default function FormulaModal({ item, onClose }) {
           ))}
         </div>
 
-        {/* 紅色提醒區塊已移至最底部 */}
+        {/* 重要提醒 */}
         {alertContent && (
           <div className="mt-10 p-4 bg-red-50 border border-red-100 rounded-xl text-red-700 text-sm font-medium">
             <strong className="block mb-1">⚠️ 重要提醒：</strong>

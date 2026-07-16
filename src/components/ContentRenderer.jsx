@@ -174,21 +174,113 @@ export function FormulaContent({ item, renderFormattedText }) {
     </div>
   );
 }
+  export function OilContent({ item, renderFormattedText }) {
+  // 自動匹配器：傳入多個可能的 key 名稱，只要有一個有資料就抓取
+  const getVal = (...keys) => {
+    for (const key of keys) {
+      if (item[key]) return item[key];
+      if (item.oilDetails?.[key]) return item.oilDetails[key];
+      if (item.oilTable?.[key]) return item.oilTable[key];
+    }
+    return null;
+  };
 
-export function OilContent({ item, renderFormattedText }) {
   return (
     <div className="p-8 md:p-12">
-      <div className="mb-3 flex flex-wrap gap-1.5"><span className="text-xs font-medium px-2 py-0.5 rounded bg-[#EAE7E0] text-[#6B7A6E]">{item.constitutionTag}體質</span><span className="text-xs font-medium px-2 py-0.5 rounded bg-[#E5EAE6] text-[#4E6654]">{item.chemicalTag}屬性</span></div>
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#EAE7E0] text-[#6B7A6E]">{item.constitutionTag || "無"}體質</span>
+        <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#E5EAE6] text-[#4E6654]">{item.chemicalTag || "無"}屬性</span>
+      </div>
       <h2 className="text-4xl font-bold text-[#6B9080] mb-1">{item.name}</h2>
       <p className="text-base italic text-[#A39284] mt-1 mb-6 font-serif border-b border-[#F7F5F0] pb-4">{item.englishName}</p>
-      <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm"><table className="w-full text-[15px] border-collapse"><tbody className="divide-y divide-[#E5E0D8] text-[#3A4F3F]"> {[{ label: '別名', val: item.oilTable?.alias }, { label: '植物種類／萃取部位', val: item.oilTable?.typePart }, { label: '萃取方法', val: item.oilTable?.method }, { label: '拉丁學名', val: item.oilTable?.latin }, { label: '科名', val: item.oilTable?.family }, { label: '性味(四氣／五味)', val: item.oilTable?.nature }, { label: '五行／陰陽屬性', val: item.oilTable?.property }, { label: '歸經', val: item.oilTable?.meridian }, { label: '適用體質', val: item.oilTable?.constitution }, { label: '主治功能', val: item.oilTable?.indications }, { label: '類比音符', val: item.oilTable?.noteAnalogy }, { label: '主宰星球', val: item.oilTable?.planet }, { label: '重要產地', val: item.oilTable?.origin }].map((row, i) => (<tr key={i} className="text-center bg-[#FBFBFA]/40"><td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">{row.label}</td><td className="px-4 py-2 text-left">{renderFormattedText(row.val)}</td></tr>))}</tbody></table></div>
+      
+      <div className="overflow-hidden border border-[#E5E0D8] rounded-xl mb-8 shadow-sm">
+        <table className="w-full text-[15px] border-collapse">
+          <tbody className="divide-y divide-[#E5E0D8] text-[#3A4F3F]">{[
+            { label: '別名', keys: ['alias'] },
+            { label: '性味(四氣／五味)', keys: ['natur'] },
+            { label: '五行／陰陽屬性', keys: ['property'] },
+            { label: '植物種類', keys: ['typePart', 'plantPart'] },
+            { label: '萃取方法', keys: ['method', 'extraction'] },
+            { label: '拉丁學名', keys: ['latin'] },
+            { label: '科名', keys: ['family'] },
+            { label: '五行', keys: ['fiveElements'] },
+            { label: '歸經', keys: ['meridian'] },
+            { label: '體質', keys: ['constitution'] },
+            { label: '主治', keys: ['indications'] },
+            { label: '類比音符', keys: ['noteAnalogy'] },
+            { label: '星球', keys: ['planet'] },
+            { label: '產地', keys: ['origin'] }
+          ].map((row, i) => (
+            <tr key={i} className="text-center bg-[#FBFBFA]/40">
+              <td className="px-4 py-2 font-bold bg-[#FBFBFA] border-r border-[#E5E0D8]">{row.label}</td>
+              <td className="px-4 py-2 text-left">{renderFormattedText(getVal(...row.keys) || "無記載")}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+
       <div className="space-y-5 text-[#3A4F3F]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40"><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">🔍 氣味</span>{renderFormattedText(item.oilDetails?.scent)}</div><div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40"><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">✨ 外觀</span>{renderFormattedText(item.oilDetails?.appearance)}</div></div>
-        <div><span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span><div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30">{renderFormattedText(item.oilDetails?.historyMyth)}</div></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40"><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">🔬 化學結構</span>{renderFormattedText(item.oilDetails?.chemistry)}</div><div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40"><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">⚖️ 屬性</span>{renderFormattedText(item.oilDetails?.attribute)}</div></div>
-        <div className="bg-red-50/40 p-4 rounded-xl border border-red-200/40"><span className="font-bold text-red-800 block mb-1 text-[15px]">⚠️ 注意事項</span>{renderFormattedText(item.oilDetails?.caution, "text-red-700/90")}</div>
-        <div className="space-y-4 bg-[#F7F5F0]/60 p-4 rounded-xl border border-[#E5E0D8]/40"><span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-1 text-[15px]">🩺 深度效能</span>{[{ label: '🧠 心靈療效', val: item.oilDetails?.mindEffect }, { label: '💪 身體療效', val: item.oilDetails?.bodyEffect }, { label: '🧴 皮膚療效', val: item.oilDetails?.skinEffect }].map((effect, i) => (<div key={i}><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">{effect.label}</span><div className="pl-2 border-l-2 border-[#A39284]">{renderFormattedText(effect.val)}</div></div>))}</div>
-        <div className="space-y-3 bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">{[{ label: '🔗 適合與之調和的精油', val: item.oilDetails?.blendingOils }, { label: '🧪 精油配方', val: item.oilDetails?.formulas }, { label: '🧴 按摩基底油', val: item.oilDetails?.carrierOils }].map((field, i) => (<div key={i}><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">{field.label}</span>{renderFormattedText(field.val)}</div>))}<div className="mt-2 border-t border-[#E5E0D8] pt-2"><span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">🚀 使用方法</span><div className="px-1">{renderFormattedText(item.oilDetails?.usage)}</div></div></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+            <span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">🔍 氣味</span>
+            {renderFormattedText(getVal('scent') || "無記載")}
+          </div>
+          <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+            <span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">✨ 外觀</span>
+            {renderFormattedText(getVal('appearance') || "無記載")}
+          </div>
+        </div>
+
+        <div>
+          <span className="font-bold text-[#4E6654] block mb-1.5 text-base">📜 應用歷史與相關神話</span>
+          <div className="bg-[#FBFBFA] px-5 py-4 rounded-xl border border-[#E5E0D8]/30">
+            {renderFormattedText(getVal('historyMyth', 'history', 'myth') || "無記載")}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+            <span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">🔬 化學結構</span>
+            {renderFormattedText(getVal('chemistry', 'chemical') || "無記載")}
+          </div>
+          <div className="bg-[#FBFBFA] p-3.5 rounded-xl border border-[#E5E0D8]/40">
+            <span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">⚖️ 屬性</span>
+            {renderFormattedText(getVal('attribute', 'property') || "無記載")}
+          </div>
+        </div>
+
+        <div className="bg-red-50/40 p-4 rounded-xl border border-red-200/40">
+          <span className="font-bold text-red-800 block mb-1 text-[15px]">⚠️ 注意事項</span>
+          {renderFormattedText(getVal('caution') || "無記載", "text-red-700/90")}
+        </div>
+
+        <div className="space-y-4 bg-[#F7F5F0]/60 p-4 rounded-xl border border-[#E5E0D8]/40">
+          <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 mb-1 text-[15px]">🩺 深度效能</span>
+          {[
+            { label: '🧠 心靈療效', k: ['mindEffect', 'mind'] },
+            { label: '💪 身體療效', k: ['bodyEffect', 'body'] },
+            { label: '🧴 皮膚療效', k: ['skinEffect', 'skin'] }
+          ].map((effect, i) => (
+            <div key={i}>
+              <span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">{effect.label}</span>
+              <div className="pl-2 border-l-2 border-[#A39284]">{renderFormattedText(getVal(...effect.k) || "無記載")}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-3 bg-[#3A4F3F]/5 p-4 rounded-xl border border-[#3A4F3F]/10">
+          {[
+            { label: '🔗 適合與之調和的精油', k: ['blendingOils'] },
+            { label: '🧪 精油配方', k: ['formulas'] },
+            { label: '🧴 按摩基底油', k: ['carrierOil'] }
+          ].map((field, i) => (
+            <div key={i}>
+              <span className="font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest">{field.label}</span>
+              {renderFormattedText(getVal(...field.k) || "無記載")}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

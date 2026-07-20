@@ -53,7 +53,13 @@ export default function App() {
   
   const filteredData = allData.filter(item => {
     if (!item || !item.name) return false;
+    
+    // 1. 類別篩選 (這保持不變，確保只顯示選定類別的項目)
+    const matchesCategory = item.category === selectedCategory;
+    
+    // 2. 搜尋邏輯 (改成掃描 item 中所有可能的文字欄位)
     const query = searchQuery.toLowerCase();
+    if (!query) return matchesCategory;
     const tags = [item.tag, item.constitutionTag, item.chemicalTag, item.acuTable?.meridian].filter(Boolean).join(' ');
     
     let categorySpecificSearch = '';
@@ -63,8 +69,44 @@ export default function App() {
     else if (item.category === '中藥') categorySpecificSearch = [item.effect, item.indications].filter(Boolean).join(' ');
     else if (item.category === '方劑') categorySpecificSearch = [item.effect, item.indications, item.syndrome, item.modifications, item.modernApp].filter(Boolean).join(' ');
 
-    const searchableText = `${item.name} ${item.englishName || ''} ${tags} ${categorySpecificSearch}`.toLowerCase();
-    return searchableText.includes(query) && item.category === selectedCategory;
+    const searchableFields = [
+      item.name,
+      item.englishName,
+      item.tag,
+      item.constitutionTag,
+      item.chemicalTag,
+      item.description,
+      item.effect,
+      item.indications,
+      item.syndrome,
+      item.modifications,
+      item.modernApp,
+      item.acuTable?.meridian,
+      item.acuTable?.effectAncient,
+      item.acuTable?.effectModern,
+      item.acuTable?.function,
+      item.acuTable?.combination,
+      item.acuDetails?.indications,
+      item.acuTable?.matchingPoints,
+      item.acuTable?.code,
+      item.oilDetails?.mindEffect,
+      item.oilDetails?.bodyEffect,
+      item.oilDetails?.skinEffect,
+      item.oilDetails?.usage,
+      item.oilDetails?.nature,
+      item.formData?.pharmacology,
+      item.formData?.contemporary,
+      item.formData?.directions,
+      item.formData?.note,
+      item.oilDetails?.attribute 
+    ];
+
+    const searchableText = searchableFields
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return matchesCategory && searchableText.includes(query);
   });
   
   if (isAdminMode) {

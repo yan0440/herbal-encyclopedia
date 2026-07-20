@@ -29,9 +29,9 @@ const parseBoldSyntax = (str) => {
 };
 
 const UI = {
-  text: "text-[15px] leading-8 text-[#6B7A6E]", 
+  text: "text-[16px] leading-8 text-[#6B7A6E]", 
   title: "text-4xl font-bold text-[#6B9080] mb-2",
-  sectionLabel: "font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-sm tracking-widest",
+  sectionLabel: "font-bold text-[#4E6654] block border-b border-[#E5E0D8] pb-1 mb-2 text-l tracking-widest",
 };
 
 export default function HerbModal({ item, onClose }) {

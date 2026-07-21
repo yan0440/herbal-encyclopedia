@@ -141,7 +141,7 @@ export default function BookStructureEditor({ formData, setFormData, labelClass,
               <button
                 type="button"
                 onClick={() => {
-                  const template = "【概念】：\n\n【辨證分析】：\n\n【文獻別錄】：\n\n【方藥】：\n";
+                  const template = "【概念】\n\n【辨證分析】\n\n【文獻別錄】\n\n";
                   const currentText = node.text || '';
                   updateNode(path, { text: currentText ? currentText + '\n' + template : template });
                 }}

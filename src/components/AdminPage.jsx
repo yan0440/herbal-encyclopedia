@@ -2,68 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import AddEntryPage from './AddEntryPage';
-import ViewEntryModal from './ViewEntryModal';
-import ViewCardModal from './ViewCardModal';
-import BookModal from './BookModal';
-import OilModal from './OilModal';
-import AcuModal from './AcuModal';
-import HerbModal from './HerbModal';
-import FormulaModal from './FormulaModal';
-
-// 統一的檢視器容器組件
-function EncyclopediaViewer({ item, isCard, onClose }) {
-  if (!item) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100]">
-      <div className="absolute inset-0 bg-black/35" onClick={onClose} />
-
-      <div className="relative z-10 flex min-h-full items-start justify-center p-4 sm:p-6 overflow-y-auto">
-        <div className="w-full max-w-6xl bg-[#FCFBFA] rounded-3xl shadow-2xl border border-[#E5E0D8] overflow-hidden max-h-[90vh] flex flex-col">
-          <div className="bg-white border-b border-[#E5E0D8] px-8 py-4 flex items-center justify-between shrink-0 sticky top-0 z-10 shadow-sm">
-            <button
-              onClick={onClose}
-              className="text-sm font-bold text-[#A39284] hover:text-[#3A4F3F] transition-colors"
-            >
-              ← 返回後台列表
-            </button>
-            <div className="text-xs font-bold tracking-widest text-[#6B9080] uppercase">
-              開發者專區 - {item.category || '預覽'}
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto py-8 px-6">
-            {isCard ? (
-              <ViewCardModal item={item} onClose={onClose} />
-            ) : item.category === '書籍' ? (
-              <BookModal item={item} onClose={onClose} />
-            ) : item.category === '精油' ? (
-              <OilModal item={item} onClose={onClose} />
-            ) : item.category === '穴道' ? (
-              <AcuModal item={item} onClose={onClose} />
-            ) : item.category === '中藥' ? (
-              <HerbModal item={item} onClose={onClose} />
-            ) : item.category === '方劑' ? (
-              <FormulaModal item={item} onClose={onClose} />
-            ) : (
-              <ViewEntryModal item={item} onClose={onClose} />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import EncyclopediaViewer from './EncyclopediaViewer';
+import CardViewer from './CardViewer';
 
 export default function AdminPage({ allData, onBack }) {
   const [password, setPassword] = useState('');
   const [isAuth, setIsAuth] = useState(false);
   const [viewState, setViewState] = useState('list');
   const [editingItem, setEditingItem] = useState(null);
-
   const [viewingItem, setViewingItem] = useState(null);
   const [viewingCard, setViewingCard] = useState(null);
-
   const [version, setVersion] = useState('v1.2.7');
   const [filterCategory, setFilterCategory] = useState('全部');
 
@@ -114,19 +62,30 @@ export default function AdminPage({ allData, onBack }) {
   }
 
   if (viewState === 'add') {
-    return <AddEntryPage onClose={() => { setViewState('list'); setEditingItem(null); }} editingItem={editingItem} />;
+    return (
+      <AddEntryPage
+        onClose={() => {
+          setViewState('list');
+          setEditingItem(null);
+        }}
+        editingItem={editingItem}
+      />
+    );
   }
 
   return (
     <div className="w-screen h-dvh bg-[#F7F5F0] flex flex-col overflow-hidden">
-      {(viewingItem || viewingCard) && (
+      {viewingItem && (
         <EncyclopediaViewer
-          item={viewingItem || viewingCard}
-          isCard={!!viewingCard}
-          onClose={() => {
-            setViewingItem(null);
-            setViewingCard(null);
-          }}
+          item={viewingItem}
+          onClose={() => setViewingItem(null)}
+        />
+      )}
+
+      {viewingCard && (
+        <CardViewer
+          item={viewingCard}
+          onClose={() => setViewingCard(null)}
         />
       )}
 

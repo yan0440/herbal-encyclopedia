@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-function AutoResizeTextarea({ value, onChange, placeholder, className }) {
+function AutoResizeTextarea({ value, onChange, placeholder, className, disabled }) {
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -18,6 +18,7 @@ function AutoResizeTextarea({ value, onChange, placeholder, className }) {
       onChange={onChange}
       placeholder={placeholder}
       rows={1}
+      disabled={disabled}
       className={`${className} w-full overflow-hidden resize-none`}
     />
   );
@@ -165,7 +166,14 @@ export default function BookStructureEditor({
     setSelectedPath(null);
   };
 
-  const addRoot = () => {
+  const addRootContent = () => {
+    const newNode = createContentNode();
+    const newChapters = [...chapters, newNode];
+    updateChapters(newChapters);
+    setSelectedPath([newChapters.length - 1]);
+  };
+
+  const addRootFolder = () => {
     const newNode = createFolderNode();
     const newChapters = [...chapters, newNode];
     updateChapters(newChapters);
@@ -204,7 +212,7 @@ export default function BookStructureEditor({
       selectedPath.every((v, i) => v === path[i]);
 
     const { pureTitle, aliasText } = parseTitle(node.title || '');
-    const label = isRoot ? '主目錄' : isFolder ? '子目錄' : '內文篇章';
+    const label = isRoot ? '根節點' : isFolder ? '子目錄' : '內文篇章';
 
     return (
       <div key={node.id || index} className="space-y-2">
@@ -274,26 +282,41 @@ export default function BookStructureEditor({
   };
 
   const selectedTitleParts = parseTitle(selectedNode?.title || '');
-  const isRootSelected = selectedPath?.length === 1;
 
   return (
     <div className="w-full bg-[#FCFBFA] flex flex-col overflow-hidden">
       <main className="flex-1 min-h-0 flex overflow-hidden">
         <aside className="w-[320px] shrink-0 border-r border-[#E5E0D8] bg-[#F7F5F0] flex flex-col min-h-0">
           <div className="shrink-0 p-4 border-b border-[#E5E0D8]">
-            <button
-              type="button"
-              onClick={addRoot}
-              disabled={disabled || isViewOnly}
-              className="w-full py-3 bg-[#6B9080] text-white rounded-xl font-bold hover:bg-[#5A7B6D] disabled:opacity-50"
-            >
-              ＋ 新增主目錄
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={addRootContent}
+                disabled={disabled || isViewOnly}
+                className="w-full py-3 bg-[#6B9080] text-white rounded-xl font-bold hover:bg-[#5A7B6D] disabled:opacity-50"
+              >
+                ＋ 新增內文
+              </button>
+
+              <button
+                type="button"
+                onClick={addRootFolder}
+                disabled={disabled || isViewOnly}
+                className="w-full py-3 bg-white border border-[#E5E0D8] text-[#3A4F3F] rounded-xl font-bold hover:bg-[#F7F5F0] disabled:opacity-50"
+              >
+                ＋ 新增篇章
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 [scrollbar-gutter:stable]">
-            {Array.isArray(chapters) &&
-              chapters.map((chapter, index) => renderNode(chapter, index, [index], 0))}
+            {Array.isArray(chapters) && chapters.length > 0 ? (
+              chapters.map((chapter, index) => renderNode(chapter, index, [index], 0))
+            ) : (
+              <div className="text-center text-sm text-gray-400 py-8">
+                目前沒有內容，請先新增一筆。
+              </div>
+            )}
           </div>
         </aside>
 
@@ -303,7 +326,7 @@ export default function BookStructureEditor({
               <div className="bg-white border border-[#E5E0D8] rounded-2xl p-5 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold px-2 py-1 rounded bg-[#E5E0D8] text-[#3A4F3F]">
-                    {selectedNode.type === 'folder' ? '子目錄' : '內文篇章'}
+                    {selectedNode.type === 'folder' ? '篇章' : '內文'}
                   </span>
                   <button
                     type="button"
@@ -340,7 +363,7 @@ export default function BookStructureEditor({
                           title: buildTitle(selectedTitleParts.pureTitle, e.target.value),
                         })
                       }
-                      disabled={disabled || isViewOnly || isRootSelected}
+                      disabled={disabled || isViewOnly}
                       className="w-full border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none text-[#6B9080] disabled:bg-[#F7F5F0]"
                       placeholder="輸入別名"
                     />
@@ -349,16 +372,13 @@ export default function BookStructureEditor({
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">類型</label>
                     <select
-                      value={isRootSelected ? 'folder' : (selectedNode.type || 'content')}
-                      onChange={(e) => {
-                        if (isRootSelected) return;
-                        updateNode(selectedPath, { type: e.target.value });
-                      }}
-                      disabled={disabled || isViewOnly || isRootSelected}
+                      value={selectedNode.type || 'content'}
+                      onChange={(e) => updateNode(selectedPath, { type: e.target.value })}
+                      disabled={disabled || isViewOnly}
                       className="w-full md:w-48 border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none bg-white disabled:bg-[#F7F5F0]"
                     >
                       <option value="content">內文</option>
-                      <option value="folder">子目錄</option>
+                      <option value="folder">篇章</option>
                     </select>
                   </div>
                 </div>

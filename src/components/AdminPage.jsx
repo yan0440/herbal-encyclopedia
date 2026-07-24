@@ -31,11 +31,81 @@ export default function AdminPage({ allData, onBack }) {
 
   const categories = ['全部', '書籍', '精油', '穴道', '中藥', '方劑'];
 
+  const getBookSearchText = (item) => {
+    const walkChapters = (chapters) => {
+      if (!chapters) return '';
+      const arr = Array.isArray(chapters) ? chapters : Object.values(chapters);
+
+      return arr
+        .map((ch) => {
+          const current = [
+            ch.title,
+            ch.alias,
+            ch.name,
+            ch.text,
+          ].filter(Boolean).join(' ');
+
+          return `${current} ${walkChapters(ch.children)}`;
+        })
+        .join(' ');
+    };
+
+    return [
+      item.name,
+      item.bookDetails?.author,
+      walkChapters(item.bookDetails?.chapters),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+  };
+
+  const getSearchText = (item) => {
+    return [
+      item.name,
+      item.englishName,
+      item.tag,
+      item.constitutionTag,
+      item.chemicalTag,
+      item.description,
+      item.effect,
+      item.indications,
+      item.syndrome,
+      item.modifications,
+      item.modernApp,
+      item.acuTable?.meridian,
+      item.acuTable?.effectAncient,
+      item.acuTable?.effectModern,
+      item.acuTable?.function,
+      item.acuTable?.combination,
+      item.acuDetails?.indications,
+      item.acuTable?.matchingPoints,
+      item.acuTable?.code,
+      item.oilDetails?.mindEffect,
+      item.oilDetails?.bodyEffect,
+      item.oilDetails?.skinEffect,
+      item.oilDetails?.usage,
+      item.oilDetails?.nature,
+      item.oilDetails?.attribute,
+      item.pharmacology,
+      item.contemporary,
+      item.directions,
+      item.note,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+  };
+
   const filteredEntries = allData
     .filter((item) => filterCategory === '全部' || item.category === filterCategory)
-    .filter((item) =>
-      String(item.name || '').toLowerCase().includes(searchName.toLowerCase())
-    );
+    .filter((item) => {
+      const query = searchName.toLowerCase();
+      if (!query) return true;
+      const searchableText =
+        item.category === '書籍' ? getBookSearchText(item) : getSearchText(item);
+      return searchableText.includes(query);
+    });
 
   const displayedEntries = filteredEntries.slice(0, displayCount);
 
@@ -93,17 +163,11 @@ export default function AdminPage({ allData, onBack }) {
   return (
     <div className="w-screen h-dvh bg-[#F7F5F0] flex flex-col overflow-hidden">
       {viewingItem && (
-        <EncyclopediaViewer
-          item={viewingItem}
-          onClose={() => setViewingItem(null)}
-        />
+        <EncyclopediaViewer item={viewingItem} onClose={() => setViewingItem(null)} />
       )}
 
       {viewingCard && (
-        <CardViewer
-          item={viewingCard}
-          onClose={() => setViewingCard(null)}
-        />
+        <CardViewer item={viewingCard} onClose={() => setViewingCard(null)} />
       )}
 
       <header className="shrink-0 bg-[#F7F5F0] px-6 md:px-10 py-6 border-b border-[#E5E0D8] print:hidden">
@@ -134,38 +198,40 @@ export default function AdminPage({ allData, onBack }) {
 
       <main className="flex-1 min-h-0 overflow-hidden px-6 md:px-10 py-6 print:p-0">
         <div className="h-full flex flex-col min-h-0 gap-6">
-          <div className="shrink-0 flex gap-2 overflow-x-auto pb-2 print:hidden">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  filterCategory === cat
-                    ? 'bg-[#3A4F3F] text-white'
-                    : 'bg-white text-[#6B7A6E] border border-[#E5E0D8]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+          <div className="shrink-0 flex flex-col md:flex-row md:items-center md:justify-between gap-3 print:hidden">
+            <div className="relative w-full md:max-w-md">
+              <input
+                type="text"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="搜尋名稱"
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-white outline-none text-[#3A4F3F] placeholder:text-[#B8A99A]"
+              />
+              {searchName && (
+                <button
+                  onClick={() => setSearchName('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-white border border-[#E5E0D8] text-[#6B7A6E] hover:bg-[#F0EDE6]"
+                >
+                  清除
+                </button>
+              )}
+            </div>
 
-          <div className="shrink-0 flex items-center gap-3 print:hidden">
-            <input
-              type="text"
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              placeholder="搜尋名稱"
-              className="w-full md:w-80 px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-white outline-none text-[#3A4F3F] placeholder:text-[#B8A99A]"
-            />
-            {searchName && (
-              <button
-                onClick={() => setSearchName('')}
-                className="px-4 py-2.5 rounded-xl bg-white border border-[#E5E0D8] text-[#6B7A6E] hover:bg-[#F0EDE6]"
-              >
-                清除
-              </button>
-            )}
+            <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 md:justify-end">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    filterCategory === cat
+                      ? 'bg-[#3A4F3F] text-white'
+                      : 'bg-white text-[#6B7A6E] border border-[#E5E0D8]'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto pr-1">
@@ -176,7 +242,6 @@ export default function AdminPage({ allData, onBack }) {
                   className="bg-white p-5 rounded-2xl border border-[#E5E0D8]/60 flex justify-between items-center shadow-sm print:break-inside-avoid"
                 >
                   <span className="font-semibold text-[#3A4F3F]">{item.name}</span>
-
                   <div className="flex gap-2 flex-wrap justify-end print:hidden">
                     <button
                       onClick={() => setViewingItem(item)}
@@ -184,14 +249,12 @@ export default function AdminPage({ allData, onBack }) {
                     >
                       檢視
                     </button>
-
                     <button
                       onClick={() => setViewingCard(item)}
                       className="px-4 py-2 text-sm text-[#3A4F3F] font-medium bg-[#F7F5F0] rounded-lg hover:bg-[#E5E0D8]"
                     >
                       圖卡
                     </button>
-
                     <button
                       onClick={() => {
                         setEditingItem(item);
@@ -201,7 +264,6 @@ export default function AdminPage({ allData, onBack }) {
                     >
                       編輯
                     </button>
-
                     <button
                       onClick={() => handleDelete(item.id)}
                       className="px-4 py-2 text-sm text-[#D4A373] font-medium bg-[#F7F5F0] rounded-lg hover:bg-[#E5E0D8]"

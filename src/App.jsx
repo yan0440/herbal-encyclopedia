@@ -113,6 +113,31 @@ const DataCard = memo(function DataCard({ item, onClick, parseBoldSyntax }) {
   );
 });
 
+const getBookSearchText = (item) => {
+  const walkChapters = (chapters) => {
+    if (!chapters) return '';
+    const arr = Array.isArray(chapters) ? chapters : Object.values(chapters);
+
+    return arr
+      .map((ch) => {
+        const current = [ch.title, ch.alias, ch.name, ch.text]
+          .filter(Boolean)
+          .join(' ');
+        return `${current} ${walkChapters(ch.children)}`;
+      })
+      .join(' ');
+  };
+
+  return [
+    item.name,
+    item.bookDetails?.author,
+    walkChapters(item.bookDetails?.chapters),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+};
+
 const getSearchText = (item) => {
   const fields = [
     item.name,
@@ -196,7 +221,9 @@ export default function App() {
       const matchesCategory = item.category === selectedCategory;
       if (!query) return matchesCategory;
 
-      const searchableText = getSearchText(item);
+      const searchableText =
+        item.category === '書籍' ? getBookSearchText(item) : getSearchText(item);
+
       return matchesCategory && searchableText.includes(query);
     });
   }, [allData, debouncedSearchQuery, selectedCategory]);
@@ -263,14 +290,14 @@ export default function App() {
 
         <section className="mb-10 rounded-[2rem] border border-white bg-white p-4 md:p-5 shadow-sm">
           <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-            <div className="relative w-full md:max-w-xl">
+            <div className="relative w-full md:max-w-xs">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#B19C8A]">⌕</span>
               <input
                 type="text"
                 placeholder="搜尋名稱、英文、經絡或功效標籤..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-2xl border border-[#E6DDD3] bg-white py-3 pl-11 pr-4 text-sm outline-none ring-0 transition focus:border-[#3A4F3F]/30 focus:bg-white"
+                className="w-full rounded-2xl border border-[#E6DDD3] bg-white py-3 pl-8 pr-4 text-sm outline-none ring-0 transition focus:border-[#3A4F3F]/30 focus:bg-white"
               />
             </div>
 
@@ -279,7 +306,7 @@ export default function App() {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
+                  className={`shrink-0 rounded-full px-4.5 py-2 text-sm font-medium transition-all ${
                     selectedCategory === cat
                       ? 'bg-[#2F4638] text-white shadow-md'
                       : 'bg-white text-[#5F6F65] border border-[#E6DDD3] hover:text-[#2F4638]'

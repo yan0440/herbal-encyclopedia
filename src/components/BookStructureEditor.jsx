@@ -71,23 +71,43 @@ function getNodeByPath(chapters, path) {
 
 function findFirstEditableNode(chapters) {
   const stack = chapters.map((node, index) => ({ node, path: [index] }));
+
   while (stack.length) {
     const { node, path } = stack.shift();
     if (node?.type !== 'folder') return { node, path };
     if (Array.isArray(node.children)) {
-      node.children.forEach((child, idx) => stack.push({ node: child, path: [...path, 'children', idx] }));
+      node.children.forEach((child, idx) =>
+        stack.push({ node: child, path: [...path, 'children', idx] })
+      );
     }
   }
+
   return chapters.length ? { node: chapters[0], path: [0] } : null;
+}
+
+function createFolderNode() {
+  return {
+    id: `ch_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    title: '',
+    type: 'folder',
+    children: [],
+    text: '',
+  };
+}
+
+function createContentNode() {
+  return {
+    id: `id_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    title: '',
+    type: 'content',
+    children: [],
+    text: '',
+  };
 }
 
 export default function BookStructureEditor({
   formData,
   setFormData,
-  labelClass = '',
-  inputClass = '',
-  addNode,
-  lastNodeId,
   disabled = false,
   isViewOnly = false,
 }) {
@@ -129,6 +149,7 @@ export default function BookStructureEditor({
 
   const deleteNode = (path) => {
     if (!path || path.length === 0) return;
+
     const parentPath = path.slice(0, -1);
     const indexToDelete = path[path.length - 1];
 
@@ -145,27 +166,15 @@ export default function BookStructureEditor({
   };
 
   const addRoot = () => {
-    const newNode = {
-      id: `ch_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      title: '',
-      type: 'folder',
-      children: [],
-      text: '',
-    };
-
+    const newNode = createFolderNode();
     const newChapters = [...chapters, newNode];
     updateChapters(newChapters);
     setSelectedPath([newChapters.length - 1]);
+    setExpandedNodes((prev) => ({ ...prev, [newNode.id]: true }));
   };
 
-  const addChild = (path) => {
-    const newChild = {
-      id: `id_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      title: '',
-      type: 'content',
-      children: [],
-      text: '',
-    };
+  const addChild = (path, type = 'content') => {
+    const newChild = type === 'folder' ? createFolderNode() : createContentNode();
 
     const newChapters = updateNestedState(chapters, path, (node) => {
       const currentChildren = Array.isArray(node.children) ? node.children : [];
@@ -173,12 +182,21 @@ export default function BookStructureEditor({
     });
 
     updateChapters(newChapters);
+
+    const parentNode = getNodeByPath(chapters, path);
+    if (parentNode?.id) {
+      setExpandedNodes((prev) => ({ ...prev, [parentNode.id]: true }));
+    }
+
+    const parentChildren = getNodeByPath(newChapters, path)?.children || [];
+    setSelectedPath([...path, 'children', parentChildren.length - 1]);
   };
 
   const renderNode = (node, index, path, level = 0) => {
     if (!node) return null;
 
-    const isFolder = node.type === 'folder';
+    const isRoot = level === 0;
+    const isFolder = node.type === 'folder' || isRoot;
     const isExpanded = expandedNodes[node.id] !== false;
     const isSelected =
       selectedPath &&
@@ -186,7 +204,7 @@ export default function BookStructureEditor({
       selectedPath.every((v, i) => v === path[i]);
 
     const { pureTitle, aliasText } = parseTitle(node.title || '');
-    const label = level === 0 ? '主目錄' : isFolder ? '子目錄' : '內文篇章';
+    const label = isRoot ? '主目錄' : isFolder ? '子目錄' : '內文篇章';
 
     return (
       <div key={node.id || index} className="space-y-2">
@@ -229,13 +247,26 @@ export default function BookStructureEditor({
             {node.children.map((child, childIdx) =>
               renderNode(child, childIdx, [...path, 'children', childIdx], level + 1)
             )}
-            <button
-              type="button"
-              onClick={() => addChild(path)}
-              className="text-xs font-bold text-[#6B9080] hover:text-[#5A7B6D] px-2 py-1 rounded hover:bg-[#6B9080]/10"
-            >
-              ＋ 新增{level === 0 ? '子項目' : '下級項目'}
-            </button>
+
+            {!isViewOnly && (
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => addChild(path, 'content')}
+                  className="text-xs font-bold text-[#6B9080] hover:text-[#5A7B6D] px-2 py-1 rounded hover:bg-[#6B9080]/10"
+                >
+                  ＋ 新增內文
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => addChild(path, 'folder')}
+                  className="text-xs font-bold text-[#6B9080] hover:text-[#5A7B6D] px-2 py-1 rounded hover:bg-[#6B9080]/10"
+                >
+                  ＋ 新增子目錄
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -243,7 +274,7 @@ export default function BookStructureEditor({
   };
 
   const selectedTitleParts = parseTitle(selectedNode?.title || '');
-  const isSelectedFolder = selectedNode?.type === 'folder';
+  const isRootSelected = selectedPath?.length === 1;
 
   return (
     <div className="w-full bg-[#FCFBFA] flex flex-col overflow-hidden">
@@ -253,7 +284,8 @@ export default function BookStructureEditor({
             <button
               type="button"
               onClick={addRoot}
-              className="w-full py-3 bg-[#6B9080] text-white rounded-xl font-bold hover:bg-[#5A7B6D]"
+              disabled={disabled || isViewOnly}
+              className="w-full py-3 bg-[#6B9080] text-white rounded-xl font-bold hover:bg-[#5A7B6D] disabled:opacity-50"
             >
               ＋ 新增主目錄
             </button>
@@ -271,12 +303,13 @@ export default function BookStructureEditor({
               <div className="bg-white border border-[#E5E0D8] rounded-2xl p-5 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold px-2 py-1 rounded bg-[#E5E0D8] text-[#3A4F3F]">
-                    {isSelectedFolder ? '子目錄' : '內文篇章'}
+                    {selectedNode.type === 'folder' ? '子目錄' : '內文篇章'}
                   </span>
                   <button
                     type="button"
                     onClick={() => deleteNode(selectedPath)}
-                    className="ml-auto text-sm text-red-500 hover:text-red-600"
+                    disabled={disabled || isViewOnly}
+                    className="ml-auto text-sm text-red-500 hover:text-red-600 disabled:opacity-50"
                   >
                     刪除
                   </button>
@@ -292,6 +325,7 @@ export default function BookStructureEditor({
                           title: buildTitle(e.target.value, selectedTitleParts.aliasText),
                         })
                       }
+                      disabled={disabled || isViewOnly}
                       className="w-full border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none"
                       placeholder="輸入名稱"
                     />
@@ -306,7 +340,8 @@ export default function BookStructureEditor({
                           title: buildTitle(selectedTitleParts.pureTitle, e.target.value),
                         })
                       }
-                      className="w-full border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none text-[#6B9080]"
+                      disabled={disabled || isViewOnly || isRootSelected}
+                      className="w-full border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none text-[#6B9080] disabled:bg-[#F7F5F0]"
                       placeholder="輸入別名"
                     />
                   </div>
@@ -314,9 +349,13 @@ export default function BookStructureEditor({
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">類型</label>
                     <select
-                      value={selectedNode.type || 'content'}
-                      onChange={(e) => updateNode(selectedPath, { type: e.target.value })}
-                      className="w-full md:w-48 border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none bg-white"
+                      value={isRootSelected ? 'folder' : (selectedNode.type || 'content')}
+                      onChange={(e) => {
+                        if (isRootSelected) return;
+                        updateNode(selectedPath, { type: e.target.value });
+                      }}
+                      disabled={disabled || isViewOnly || isRootSelected}
+                      className="w-full md:w-48 border border-[#E5E0D8] rounded-xl px-3 py-2 outline-none bg-white disabled:bg-[#F7F5F0]"
                     >
                       <option value="content">內文</option>
                       <option value="folder">子目錄</option>
@@ -324,57 +363,50 @@ export default function BookStructureEditor({
                   </div>
                 </div>
 
-                {!isSelectedFolder && (
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const template = '【概念】\n\n\n【辨證分析】\n\n\n【文獻別錄】\n\n';
-                        const currentText = selectedNode.text || '';
-                        updateNode(selectedPath, {
-                          text: currentText ? currentText + '\n' + template : template,
-                        });
-                      }}
-                      className="text-[11px] bg-[#E5E0D8]/60 hover:bg-[#E5E0D8] text-[#3A4F3F] px-3 py-2 rounded-lg"
-                    >
-                      📌 插入模板
-                    </button>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const template = '【概念】\n\n\n【辨證分析】\n\n\n【文獻別錄】\n\n';
+                      const currentText = selectedNode.text || '';
+                      updateNode(selectedPath, {
+                        text: currentText ? currentText + '\n' + template : template,
+                      });
+                    }}
+                    disabled={disabled || isViewOnly}
+                    className="text-[11px] bg-[#E5E0D8]/60 hover:bg-[#E5E0D8] text-[#3A4F3F] px-3 py-2 rounded-lg disabled:opacity-50"
+                  >
+                    📌 插入模板
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const tableTemplate =
-                          '\n| 項目 | 內容 | 備註 |\n| :--- | :--- | :--- |\n| 欄位1 | 欄位2 | 欄位3 |\n';
-                        const currentText = selectedNode.text || '';
-                        updateNode(selectedPath, {
-                          text: currentText ? currentText + '\n' + tableTemplate : tableTemplate,
-                        });
-                      }}
-                      className="text-[11px] bg-[#E5E0D8]/60 hover:bg-[#E5E0D8] text-[#3A4F3F] px-3 py-2 rounded-lg"
-                    >
-                      📊 插入表格
-                    </button>
-                  </div>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tableTemplate =
+                        '\n| 項目 | 內容 | 備註 |\n| :--- | :--- | :--- |\n| 欄位1 | 欄位2 | 欄位3 |\n';
+                      const currentText = selectedNode.text || '';
+                      updateNode(selectedPath, {
+                        text: currentText ? currentText + '\n' + tableTemplate : tableTemplate,
+                      });
+                    }}
+                    disabled={disabled || isViewOnly}
+                    className="text-[11px] bg-[#E5E0D8]/60 hover:bg-[#E5E0D8] text-[#3A4F3F] px-3 py-2 rounded-lg disabled:opacity-50"
+                  >
+                    📊 插入表格
+                  </button>
+                </div>
               </div>
 
-              {!isSelectedFolder && (
-                <div className="bg-white border border-[#E5E0D8] rounded-2xl p-5 shadow-sm">
-                  <label className="block text-sm font-medium mb-3">內文</label>
-                  <AutoResizeTextarea
-                    value={selectedNode.text || ''}
-                    onChange={(e) => updateNode(selectedPath, { text: e.target.value })}
-                    placeholder="在此輸入詳細內容..."
-                    className="w-full min-h-[520px] p-4 bg-[#FCFBFA] text-sm border border-[#E5E0D8] rounded-xl outline-none leading-relaxed"
-                  />
-                </div>
-              )}
-
-              {isSelectedFolder && (
-                <div className="bg-white border border-[#E5E0D8] rounded-2xl p-5 shadow-sm text-sm text-gray-500">
-                  這個節點目前是子目錄，沒有內文可編輯。可把類型改成「內文」後再輸入內容。
-                </div>
-              )}
+              <div className="bg-white border border-[#E5E0D8] rounded-2xl p-5 shadow-sm">
+                <label className="block text-sm font-medium mb-3">內文</label>
+                <AutoResizeTextarea
+                  value={selectedNode.text || ''}
+                  onChange={(e) => updateNode(selectedPath, { text: e.target.value })}
+                  disabled={disabled || isViewOnly}
+                  placeholder="在此輸入詳細內容..."
+                  className="w-full min-h-[520px] p-4 bg-[#FCFBFA] text-sm border border-[#E5E0D8] rounded-xl outline-none leading-relaxed"
+                />
+              </div>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">

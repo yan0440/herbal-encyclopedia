@@ -96,51 +96,42 @@ export default function BookModal({ item, onClose }) {
         }
 
         if (part.startsWith('【') && part.endsWith('】')) {
-  const hasAlias = part.match(/\(([^)]+)\)/);
-  const raw = part.replace(/\([^)]+\)/, '').replace(/[【】]/g, '');
+          const hasAlias = part.match(/\(([^)]+)\)/);
+          const raw = part.replace(/\([^)]+\)/, '').replace(/[【】]/g, '');
+          const isSubheading = ['概念', '辨證分析', '文獻別錄'].includes(raw);
 
-  // 指定這三個當成「帶長方形背景」的副標題
-  const isSubheading = ['概念', '辨證分析', '文獻別錄'].includes(raw);
+          if (isSubheading) {
+            return (
+              <div key={idx} className="relative w-full flex items-center gap-3 my-5">
+                <div className="absolute left-0 top-0 h-10 w-full bg-[#6B9080]/10 rounded-xl" />
+                <div className="relative z-10 flex items-center gap-2 pl-3">
+                  <span className="text-lg md:text-xl font-extrabold text-[#2F4638] tracking-tight translate-y-[6px]">
+                    {raw}
+                  </span>
+                  {hasAlias && (
+                    <span className="text-xs font-medium bg-[#6B9080]/20 text-[#6B9080] px-2 py-0.5 rounded-md">
+                      {hasAlias[1]}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          }
 
-  if (isSubheading) {
-    return (
-      <div
-        key={idx}
-        className="relative w-full flex items-center gap-3 my-5"
-      >
-        {/* 長方形背景色塊 */}
-        <div className="absolute left-0 top-0 h-10 w-full bg-[#6B9080]/10 rounded-xl" />
-
-        {/* 標題文字 */}
-        <div className="relative z-10 flex items-center gap-2 pl-3">
-          <span className="text-lg md:text-xl font-extrabold text-[#2F4638] tracking-tight translate-y-[6px]">
-            {raw}
-          </span>
-          {hasAlias && (
-            <span className="text-xs font-medium bg-[#6B9080]/20 text-[#6B9080] px-2 py-0.5 rounded-md">
-              {hasAlias[1]}
+          return (
+            <span
+              key={idx}
+              className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#2F4638] pl-1 mt-2 mb-2 py-1.5 rounded-lg w-full"
+            >
+              <span>[{raw}]</span>
+              {hasAlias && (
+                <span className="text-xs font-medium bg-[#6B9080]/10 text-[#6B9080] px-2 py-0.5 rounded-md">
+                  {hasAlias[1]}
+                </span>
+              )}
             </span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // 其他【】維持原本的樣式
-  return (
-    <span
-      key={idx}
-      className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#2F4638] pl-1 mt-2 mb-2 py-1.5 rounded-lg w-full"
-    >
-      <span>[{raw}]</span>
-      {hasAlias && (
-        <span className="text-xs font-medium bg-[#6B9080]/10 text-[#6B9080] px-2 py-0.5 rounded-md">
-          {hasAlias[1]}
-        </span>
-      )}
-    </span>
-  );
-}
+          );
+        }
 
         return part;
       });
@@ -210,61 +201,60 @@ export default function BookModal({ item, onClose }) {
     );
   };
 
+  const getNodeText = (node) => {
+    if (!node) return '';
+    return node.text || '';
+  };
+
   const renderDirectory = (items, level = 0) => (
     <div className="w-full space-y-2">
       {items.map((item) => {
         if (!item || !item.id) return null;
 
-        if (item.type === 'folder') {
-          return (
-            <div key={item.id} className="w-full">
-              <div
-                className={`flex items-center gap-2 rounded-[0.95rem] bg-[#F7F5F0]/80 px-3 py-2.5 text-sm font-semibold text-[#2F4638] shadow-[0_2px_8px_rgba(63,81,68,0.03)] ${
-                  level === 0 ? '' : 'ml-1'
-                }`}
-              >
-                <span className="text-sm shrink-0">📁</span>
-                <span className="truncate flex-1">{item.title || '無標題目錄'}</span>
-              </div>
-
-              {Array.isArray(item.children) && item.children.length > 0 && (
-                <div className="mt-2 pl-2 border-l border-[#E8E0D6]/50 space-y-2">
-                  {renderDirectory(item.children, level + 1)}
-                </div>
-              )}
-            </div>
-          );
-        }
-
+        const hasChildren = item.type === 'folder' && Array.isArray(item.children) && item.children.length > 0;
         const isActive = selectedContent?.id === item.id;
+        const canOpenAsContent = !!item.text;
 
         return (
-          <button
-            key={item.id}
-            onClick={() => {
-              setSelectedContent(item);
-              requestAnimationFrame(() => {
-                if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-              });
-            }}
-            className={`group relative w-full overflow-hidden rounded-[0.95rem] px-3 py-2.5 text-left transition-all duration-200 ${
-              isActive
-                ? 'bg-[#2F4638] text-white shadow-[0_10px_24px_rgba(47,70,56,0.18)]'
-                : 'bg-white/70 text-[#5E7263] hover:-translate-y-0.5 hover:bg-[#FBFAF7] hover:shadow-[0_8px_18px_rgba(63,81,68,0.05)]'
-            }`}
-          >
-            <div
-              className={`absolute left-0 top-0 h-full w-1 ${
-                isActive ? 'bg-[#C8A97E]' : 'bg-transparent group-hover:bg-[#6B9080]/30'
+          <div key={item.id} className="w-full">
+            <button
+              onClick={() => {
+                if (item.type === 'folder' && !canOpenAsContent && hasChildren) return;
+                setSelectedContent(item);
+                requestAnimationFrame(() => {
+                  if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+              }}
+              className={`group relative w-full overflow-hidden rounded-[0.95rem] px-3 py-2.5 text-left transition-all duration-200 ${
+                isActive
+                  ? 'bg-[#2F4638] text-white shadow-[0_10px_24px_rgba(47,70,56,0.18)]'
+                  : 'bg-white/70 text-[#5E7263] hover:-translate-y-0.5 hover:bg-[#FBFAF7] hover:shadow-[0_8px_18px_rgba(63,81,68,0.05)]'
               }`}
-            />
-            <div className="flex items-center gap-2 pl-1">
-              <span className="text-sm opacity-75">📄</span>
-              <span className="truncate text-sm font-medium">
-                {getRawTitle(item.title || '無標題內容')}
-              </span>
-            </div>
-          </button>
+            >
+              <div
+                className={`absolute left-0 top-0 h-full w-1 ${
+                  isActive ? 'bg-[#C8A97E]' : 'bg-transparent group-hover:bg-[#6B9080]/30'
+                }`}
+              />
+              <div className="flex items-center gap-2 pl-1">
+                <span className="text-sm opacity-75">{item.type === 'folder' ? '📁' : '📄'}</span>
+                <span className="truncate text-sm font-medium">
+                  {getRawTitle(item.title || '無標題內容')}
+                </span>
+                {item.type === 'folder' && item.text ? (
+                  <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-[#6B9080]/10 text-[#6B9080]">
+                    有內文
+                  </span>
+                ) : null}
+              </div>
+            </button>
+
+            {item.type === 'folder' && hasChildren && (
+              <div className="mt-2 pl-2 border-l border-[#E8E0D6]/50 space-y-2">
+                {renderDirectory(item.children, level + 1)}
+              </div>
+            )}
+          </div>
         );
       })}
     </div>

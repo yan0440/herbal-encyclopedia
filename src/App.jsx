@@ -114,15 +114,15 @@ const DataCard = memo(function DataCard({ item, onClick, parseBoldSyntax }) {
 });
 
 const getBookSearchText = (item) => {
+  if (item._searchText) return item._searchText;
+
   const walkChapters = (chapters) => {
     if (!chapters) return '';
     const arr = Array.isArray(chapters) ? chapters : Object.values(chapters);
 
     return arr
       .map((ch) => {
-        const current = [ch.title, ch.alias, ch.name, ch.text]
-          .filter(Boolean)
-          .join(' ');
+        const current = [ch.title, ch.alias, ch.name, ch.text].filter(Boolean).join(' ');
         return `${current} ${walkChapters(ch.children)}`;
       })
       .join(' ');
@@ -188,7 +188,6 @@ export default function App() {
       const entries = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setDbData(entries);
     });
-
     return () => unsub();
   }, []);
 
@@ -196,7 +195,6 @@ export default function App() {
     const id = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
     }, 250);
-
     return () => clearTimeout(id);
   }, [searchQuery]);
 
@@ -209,7 +207,12 @@ export default function App() {
     []
   );
 
-  const allData = useMemo(() => [...staticData, ...dbData], [staticData, dbData]);
+  const allData = useMemo(() => {
+    return [...staticData, ...dbData].map((item) => {
+      if (item.category !== '書籍') return item;
+      return { ...item, _searchText: getBookSearchText(item) };
+    });
+  }, [staticData, dbData]);
 
   const filteredData = useMemo(() => {
     const query = debouncedSearchQuery.toLowerCase();
@@ -222,7 +225,7 @@ export default function App() {
       if (!query) return matchesCategory;
 
       const searchableText =
-        item.category === '書籍' ? getBookSearchText(item) : getSearchText(item);
+        item.category === '書籍' ? item._searchText || '' : getSearchText(item);
 
       return matchesCategory && searchableText.includes(query);
     });

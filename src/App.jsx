@@ -14,16 +14,19 @@ import OtherCategoryView from './components/OtherCategoryView';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
-const boldKeywords = ['肌肉', '神經', '血管'];
+const CATEGORIES = ['書籍', '精油', '穴道', '中藥', '方劑', '其他'];
+const BOLD_KEYWORDS = ['肌肉', '神經', '血管'];
 
 function parseBoldSyntax(str) {
   if (typeof str !== 'string') return str;
-  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|肌肉 | 神經 | 血管)/g;
+
+  const regex = /(\*\*.*?\*\*|==.*?==|【.*?】|《.*?》|\(.*?\)|肌肉|神經|血管)/g;
 
   return str.split('\n').map((line, lineIndex) => (
     <span key={lineIndex} className="block mb-1">
       {line.split(regex).map((part, i) => {
         if (!part) return null;
+
         if (part.startsWith('==') && part.endsWith('==')) {
           return (
             <mark key={i} className="bg-[#F3E1C5] px-1 rounded">
@@ -31,16 +34,27 @@ function parseBoldSyntax(str) {
             </mark>
           );
         }
-        if ((part.startsWith('**') && part.endsWith('**')) || boldKeywords.includes(part)) {
+
+        if (part.startsWith('**') && part.endsWith('**')) {
           return (
             <strong key={i} className="text-[#2F4638] font-semibold">
               {part.replace(/\*\*/g, '')}
             </strong>
           );
         }
+
+        if (BOLD_KEYWORDS.includes(part)) {
+          return (
+            <strong key={i} className="text-[#2F4638] font-semibold">
+              {part}
+            </strong>
+          );
+        }
+
         if (part.match(/^[【《\(].*[】》\)]$/)) {
           return <span key={i} className="text-[#6B9080] font-medium">{part}</span>;
         }
+
         return part;
       })}
     </span>
@@ -48,6 +62,13 @@ function parseBoldSyntax(str) {
 }
 
 const DataCard = memo(function DataCard({ item, onClick, parseBoldSyntax }) {
+  const tags = [
+    item.tag,
+    item.constitutionTag,
+    item.chemicalTag,
+    item.acuTable?.meridian,
+  ].filter(Boolean);
+
   return (
     <div
       onClick={onClick}
@@ -60,16 +81,14 @@ const DataCard = memo(function DataCard({ item, onClick, parseBoldSyntax }) {
           {item.category}
         </span>
 
-        {[item.tag, item.constitutionTag, item.chemicalTag, item.acuTable?.meridian]
-          .filter(Boolean)
-          .map((tag, idx) => (
-            <span
-              key={`tag-${idx}`}
-              className="rounded-full border border-[#E7DED4] bg-white px-3 py-1 text-[11px] font-medium text-[#7C8A80]"
-            >
-              {tag}
-            </span>
-          ))}
+        {tags.map((tag, idx) => (
+          <span
+            key={`tag-${idx}`}
+            className="rounded-full border border-[#E7DED4] bg-white px-3 py-1 text-[11px] font-medium text-[#7C8A80]"
+          >
+            {tag}
+          </span>
+        ))}
       </div>
 
       <h3 className="text-2xl md:text-[1.7rem] font-black tracking-tight text-[#2F4638] group-hover:text-[#6B9080] transition-colors">
@@ -77,7 +96,7 @@ const DataCard = memo(function DataCard({ item, onClick, parseBoldSyntax }) {
       </h3>
 
       <p className="mt-2 mb-4 text-sm italic text-[#A39284] font-serif">
-        {item.category === "精油" ? item.englishName : (item.acuTable?.code || '')}
+        {item.category === '精油' ? item.englishName : (item.acuTable?.code || '')}
       </p>
 
       <div className="text-sm leading-7 text-[#5F6F65]">
@@ -94,6 +113,42 @@ const DataCard = memo(function DataCard({ item, onClick, parseBoldSyntax }) {
   );
 });
 
+const getSearchText = (item) => {
+  const fields = [
+    item.name,
+    item.englishName,
+    item.tag,
+    item.constitutionTag,
+    item.chemicalTag,
+    item.description,
+    item.effect,
+    item.indications,
+    item.syndrome,
+    item.modifications,
+    item.modernApp,
+    item.acuTable?.meridian,
+    item.acuTable?.effectAncient,
+    item.acuTable?.effectModern,
+    item.acuTable?.function,
+    item.acuTable?.combination,
+    item.acuDetails?.indications,
+    item.acuTable?.matchingPoints,
+    item.acuTable?.code,
+    item.oilDetails?.mindEffect,
+    item.oilDetails?.bodyEffect,
+    item.oilDetails?.skinEffect,
+    item.oilDetails?.usage,
+    item.oilDetails?.nature,
+    item.oilDetails?.attribute,
+    item.pharmacology,
+    item.contemporary,
+    item.directions,
+    item.note,
+  ];
+
+  return fields.filter(Boolean).join(' ').toLowerCase();
+};
+
 export default function App() {
   const [dbData, setDbData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,10 +159,11 @@ export default function App() {
   const [visibleCount, setVisibleCount] = useState(20);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "entries"), (snapshot) => {
-      const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsub = onSnapshot(collection(db, 'entries'), (snapshot) => {
+      const entries = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setDbData(entries);
     });
+
     return () => unsub();
   }, []);
 
@@ -115,6 +171,7 @@ export default function App() {
     const id = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
     }, 250);
+
     return () => clearTimeout(id);
   }, [searchQuery]);
 
@@ -123,61 +180,23 @@ export default function App() {
   }, [selectedCategory, debouncedSearchQuery]);
 
   const staticData = useMemo(
-    () => [
-      ...(oilData || []),
-      ...(acuData || []),
-      ...(herbData || []),
-      ...(formulaData || []),
-      ...(bookData || [])
-    ],
+    () => [...(oilData || []), ...(acuData || []), ...(herbData || []), ...(formulaData || []), ...(bookData || [])],
     []
   );
 
-  const allData = useMemo(
-    () => [...staticData, ...dbData],
-    [staticData, dbData]
-  );
+  const allData = useMemo(() => [...staticData, ...dbData], [staticData, dbData]);
 
   const filteredData = useMemo(() => {
-    return allData.filter(item => {
+    const query = debouncedSearchQuery.toLowerCase();
+
+    return allData.filter((item) => {
       if (!item || !item.name) return false;
+      if (selectedCategory === '其他') return false;
+
       const matchesCategory = item.category === selectedCategory;
-      const query = debouncedSearchQuery.toLowerCase();
       if (!query) return matchesCategory;
 
-      const searchableFields = [
-        item.name,
-        item.englishName,
-        item.tag,
-        item.constitutionTag,
-        item.chemicalTag,
-        item.description,
-        item.effect,
-        item.indications,
-        item.syndrome,
-        item.modifications,
-        item.modernApp,
-        item.acuTable?.meridian,
-        item.acuTable?.effectAncient,
-        item.acuTable?.effectModern,
-        item.acuTable?.function,
-        item.acuTable?.combination,
-        item.acuDetails?.indications,
-        item.acuTable?.matchingPoints,
-        item.acuTable?.code,
-        item.oilDetails?.mindEffect,
-        item.oilDetails?.bodyEffect,
-        item.oilDetails?.skinEffect,
-        item.oilDetails?.usage,
-        item.oilDetails?.nature,
-        item.oilDetails?.attribute,
-        item.formData?.pharmacology,
-        item.formData?.contemporary,
-        item.formData?.directions,
-        item.formData?.note,
-      ];
-
-      const searchableText = searchableFields.filter(Boolean).join(' ').toLowerCase();
+      const searchableText = getSearchText(item);
       return matchesCategory && searchableText.includes(query);
     });
   }, [allData, debouncedSearchQuery, selectedCategory]);
@@ -192,6 +211,16 @@ export default function App() {
   }
 
   if (activeItem) {
+    const modalMap = {
+      精油: OilModal,
+      穴道: AcuModal,
+      中藥: HerbModal,
+      方劑: FormulaModal,
+      書籍: BookModal,
+    };
+
+    const ModalComponent = modalMap[activeItem.category];
+
     return (
       <div className="min-h-screen bg-[#fdfbf7] text-[#3A4F3F]">
         <div className="max-w-6xl mx-auto px-4 pt-8">
@@ -204,11 +233,7 @@ export default function App() {
         </div>
 
         <div className="px-4 pb-12">
-          {activeItem.category === "精油" && <OilModal item={activeItem} />}
-          {activeItem.category === "穴道" && <AcuModal item={activeItem} />}
-          {activeItem.category === "中藥" && <HerbModal item={activeItem} />}
-          {activeItem.category === "方劑" && <FormulaModal item={activeItem} />}
-          {activeItem.category === "書籍" && <BookModal item={activeItem} />}
+          {ModalComponent ? <ModalComponent item={activeItem} /> : null}
         </div>
       </div>
     );
@@ -250,29 +275,19 @@ export default function App() {
             </div>
 
             <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 md:flex-wrap md:justify-end">
-              {['書籍', '精油', '穴道', '中藥', '方劑'].map((cat) => (
+              {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
                     selectedCategory === cat
                       ? 'bg-[#2F4638] text-white shadow-md'
-                      : 'bg-white text-[#5F6F65] border border-[#E6DDD3] hover:bg-white hover:text-[#2F4638]'
+                      : 'bg-white text-[#5F6F65] border border-[#E6DDD3] hover:text-[#2F4638]'
                   }`}
                 >
                   {cat}
                 </button>
               ))}
-              <button
-                onClick={() => setSelectedCategory('其他')}
-                className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
-                  selectedCategory === '其他'
-                    ? 'bg-[#2F4638] text-white shadow-md'
-                    : 'bg-white text-[#5F6F65] border border-[#E6DDD3] hover:bg-white hover:text-[#2F4638]'
-                }`}
-              >
-                其他
-              </button>
             </div>
           </div>
         </section>

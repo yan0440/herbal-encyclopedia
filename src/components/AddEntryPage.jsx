@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import BookStructureEditor from './BookStructureEditor';
-import PreviewRenderer from "./PreviewRenderer";
 
 export default function AddEntryPage({ onClose, editingItem, isViewOnly = false }) {
   const contentRef = useRef(null);
@@ -16,6 +15,30 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
     englishName: '',
     constitutionTag: '',
     chemicalTag: '',
+    alias: '',
+    source: '',
+    effect: '',
+    indications: '',
+    literature: '',
+    contraindication: '',
+    note: '',
+    family: '',
+    nature: '',
+    meridian: '',
+    traits: '',
+    dosage: '',
+    pharmacology: '',
+    contemporary: '',
+    medicine: '',
+    preparation: '',
+    directions: '',
+    analysis: '',
+    discussion: '',
+    syndrome: '',
+    modifications: '',
+    modernApp: '',
+    modernPharmacology: '',
+    prescription: '',
     acuTable: { code: '', meridian: '', alias: '' },
     acuDetails: {
       location: '',
@@ -28,38 +51,49 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
       effectModern: '',
       matchingPoints: '',
     },
-    oilTable: {},
-    oilDetails: {},
+    oilDetails: {
+      scent: '',
+      appearance: '',
+      historyMyth: '',
+      chemistry: '',
+      attribute: '',
+      caution: '',
+      mindEffect: '',
+      bodyEffect: '',
+      skinEffect: '',
+      blendingOils: '',
+      formulas: '',
+      carrierOil: '',
+      usage: '',
+    },
     bookDetails: { author: '', chapters: [] },
   });
 
   useEffect(() => {
-    if (editingItem) {
-      const convertObjectsToArrays = (obj) => {
-        if (obj !== null && typeof obj === 'object') {
-          const keys = Object.keys(obj);
-          const isArrayLike = keys.length > 0 && keys.every((key) => !isNaN(key));
-          if (isArrayLike) {
-            return keys
-              .sort((a, b) => Number(a) - Number(b))
-              .map((key) => convertObjectsToArrays(obj[key]));
-          } else {
-            const newObj = {};
-            for (const key in obj) {
-              newObj[key] = convertObjectsToArrays(obj[key]);
-            }
-            return newObj;
-          }
-        }
-        return obj;
-      };
+    if (!editingItem) return;
 
-      setFormData(convertObjectsToArrays(editingItem));
-    }
+    const convertObjectsToArrays = (obj) => {
+      if (obj !== null && typeof obj === 'object') {
+        const keys = Object.keys(obj);
+        const isArrayLike = keys.length > 0 && keys.every((key) => !isNaN(key));
+
+        if (isArrayLike) {
+          return keys
+            .sort((a, b) => Number(a) - Number(b))
+            .map((key) => convertObjectsToArrays(obj[key]));
+        }
+
+        const newObj = {};
+        for (const key in obj) newObj[key] = convertObjectsToArrays(obj[key]);
+        return newObj;
+      }
+      return obj;
+    };
+
+    setFormData(convertObjectsToArrays(editingItem));
   }, [editingItem]);
 
   const addNode = (path = []) => {
-    const newId = `node_${Date.now()}`;
     const newNode = {
       id: `sub_${Date.now()}`,
       title: '',
@@ -74,9 +108,7 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
       newChapters.push(newNode);
     } else {
       let target = newChapters;
-      for (let i = 0; i < path.length; i++) {
-        target = target[path[i]];
-      }
+      for (let i = 0; i < path.length; i++) target = target[path[i]];
       if (target.type === 'folder') {
         if (!target.children) target.children = [];
         target.children.push(newNode);
@@ -90,12 +122,11 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
       ...formData,
       bookDetails: { ...formData.bookDetails, chapters: newChapters },
     });
-    setLastNodeId(newId);
-    return newId;
+    setLastNodeId(`node_${Date.now()}`);
   };
 
   const handleSave = async () => {
-    if (!formData.name) return alert("請至少填寫名稱！");
+    if (!formData.name) return alert('請至少填寫名稱！');
 
     const convertArraysToObjects = (obj) => {
       if (Array.isArray(obj)) {
@@ -104,11 +135,10 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
           newObj[index.toString()] = convertArraysToObjects(item);
         });
         return newObj;
-      } else if (obj !== null && typeof obj === 'object') {
+      }
+      if (obj !== null && typeof obj === 'object') {
         const newObj = {};
-        for (const key in obj) {
-          newObj[key] = convertArraysToObjects(obj[key]);
-        }
+        for (const key in obj) newObj[key] = convertArraysToObjects(obj[key]);
         return newObj;
       }
       return obj;
@@ -119,31 +149,72 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
     const newEntry = { ...cleanData, id: entryId };
 
     try {
-      await setDoc(doc(db, "entries", entryId), newEntry);
-      alert("✅ 資料已成功儲存！");
+      await setDoc(doc(db, 'entries', entryId), newEntry);
+      alert('✅ 資料已成功儲存！');
       onClose();
     } catch (error) {
-      console.error("寫入資料失敗: ", error);
-      alert("儲存失敗，請檢查控制台錯誤訊息。");
+      console.error('寫入資料失敗: ', error);
+      alert('儲存失敗，請檢查控制台錯誤訊息。');
     }
   };
 
   const inputClass = `w-full px-4 py-3 bg-white border border-[#E5E0D8] rounded-xl focus:ring-2 focus:ring-[#3A4F3F]/10 focus:border-[#3A4F3F] outline-none transition-all ${isViewOnly ? 'opacity-70 cursor-not-allowed' : ''}`;
-  const labelClass = "text-[11px] font-bold text-[#A39284] uppercase tracking-widest mb-1.5 block";
+  const labelClass = 'text-[11px] font-bold text-[#A39284] uppercase tracking-widest mb-1.5 block';
   const textareaClass = `${inputClass} h-24`;
 
+  const getValueByPath = (obj, path) => {
+    const value = path.split('.').reduce((acc, key) => acc?.[key], obj);
+    return value ?? '';
+  };
+
+  const updateValueByPath = (path, value) => {
+    const keys = path.split('.');
+    setFormData((prev) => {
+      const next = { ...prev };
+      let cur = next;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        cur[keys[i]] = { ...(cur[keys[i]] || {}) };
+        cur = cur[keys[i]];
+      }
+
+      cur[keys[keys.length - 1]] = value;
+      return next;
+    });
+  };
+
+  const renderField = (label, path, placeholder = '', isTextarea = false) => (
+    <div>
+      <label className={labelClass}>{label}</label>
+      {isTextarea ? (
+        <textarea
+          disabled={isViewOnly}
+          className={textareaClass}
+          value={getValueByPath(formData, path)}
+          placeholder={placeholder}
+          onChange={(e) => updateValueByPath(path, e.target.value)}
+        />
+      ) : (
+        <input
+          disabled={isViewOnly}
+          className={inputClass}
+          value={getValueByPath(formData, path)}
+          placeholder={placeholder}
+          onChange={(e) => updateValueByPath(path, e.target.value)}
+        />
+      )}
+    </div>
+  );
+
   return (
-    <div
-      ref={contentRef}
-      className="w-screen h-dvh bg-[#FBF9F6] flex flex-col overflow-hidden"
-    >
+    <div ref={contentRef} className="w-screen h-dvh bg-[#FBF9F6] flex flex-col overflow-hidden">
       <header className="shrink-0 px-6 md:px-10 py-5 border-b border-[#E5E0D8] bg-[#FBF9F6] flex items-center justify-between gap-4">
         <h2 className="text-2xl md:text-3xl font-black text-[#3A4F3F]">
           {isViewOnly
             ? `檢視：${formData.name || '百科資料'}`
             : editingItem
-              ? "編輯百科資料"
-              : "新增百科資料"}
+              ? '編輯百科資料'
+              : '新增百科資料'}
         </h2>
 
         <div className="flex gap-4 shrink-0">
@@ -151,7 +222,7 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
             onClick={onClose}
             className="px-6 py-2 text-[#A39284] font-bold hover:text-[#3A4F3F] transition-colors"
           >
-            {isViewOnly ? "關閉" : "取消"}
+            {isViewOnly ? '關閉' : '取消'}
           </button>
 
           {!isViewOnly && (
@@ -191,7 +262,7 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
                   <input
                     disabled={isViewOnly}
                     placeholder="輸入名稱"
-                    value={formData.name || ''}
+                    value={formData.name}
                     className={inputClass}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
@@ -203,15 +274,12 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
                     <input
                       disabled={isViewOnly}
                       placeholder="輸入作者 / 編著"
-                      value={formData.bookDetails?.author || ''}
+                      value={formData.bookDetails.author}
                       className={inputClass}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          bookDetails: {
-                            ...formData.bookDetails,
-                            author: e.target.value,
-                          },
+                          bookDetails: { ...formData.bookDetails, author: e.target.value },
                         })
                       }
                     />
@@ -224,7 +292,7 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
                 <textarea
                   disabled={isViewOnly}
                   placeholder="簡介描述"
-                  value={formData.description || ''}
+                  value={formData.description}
                   className={textareaClass}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
@@ -236,7 +304,7 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
                   <input
                     disabled={isViewOnly}
                     placeholder="例如：解表、清熱"
-                    value={formData.tag || ''}
+                    value={formData.tag}
                     className={inputClass}
                     onChange={(e) => setFormData({ ...formData, tag: e.target.value })}
                   />
@@ -260,227 +328,59 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
 
               {formData.category === '精油' && (
                 <div className="grid grid-cols-1 gap-8 animate-in fade-in duration-500">
-                  <div className={`col-span-1 md:col-span-2 grid grid-cols-1 ${isViewOnly ? 'lg:grid-cols-3' : 'md:grid-cols-2'} gap-4 bg-white p-5 rounded-2xl border border-[#E5E0D8]/50 shadow-sm`}>
-                    <span className="col-span-1 md:col-span-2 lg:col-span-3 font-bold text-[#3A4F3F] text-sm border-b border-[#E5E0D8] pb-1.5 mb-1">📊 基本屬性資料</span>
-                    <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                  <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-5 rounded-2xl border border-[#E5E0D8]/50 shadow-sm">
+                    <span className="col-span-1 md:col-span-2 font-bold text-[#3A4F3F] text-sm border-b border-[#E5E0D8] pb-1.5 mb-1">
+                      📊 基本屬性資料
+                    </span>
+                    <div className="col-span-1 md:col-span-2">
                       <label className={labelClass}>適用體質與化學屬性標籤</label>
                       <div className="flex gap-2">
                         <input
                           disabled={isViewOnly}
                           placeholder="體質標籤"
-                          value={formData.constitutionTag || ''}
+                          value={formData.constitutionTag}
                           className={inputClass}
                           onChange={(e) => setFormData({ ...formData, constitutionTag: e.target.value })}
                         />
                         <input
                           disabled={isViewOnly}
                           placeholder="化學屬性標籤"
-                          value={formData.chemicalTag || ''}
+                          value={formData.chemicalTag}
                           className={inputClass}
                           onChange={(e) => setFormData({ ...formData, chemicalTag: e.target.value })}
                         />
                       </div>
                     </div>
 
-                    {[
-                      { label: '別名', key: 'alias' },
-                      { label: '植物種類／萃取部位', key: 'typePart' },
-                      { label: '萃取方法', key: 'method' },
-                      { label: '外文名', key: 'englishName' },
-                      { label: '拉丁學名', key: 'latin' },
-                      { label: '科名', key: 'family' },
-                      { label: '性味', key: 'nature', isDetail: true },
-                      { label: '五行／陰陽屬性', key: 'property', isDetail: true },
-                      { label: '歸經', key: 'meridian', isDetail: true },
-                      { label: '主治', key: 'indications', isDetail: true },
-                      { label: '類比音符', key: 'noteAnalogy', isDetail: true },
-                      { label: '主宰星球', key: 'planet', isDetail: true },
-                      { label: '重要產地', key: 'origin', isDetail: true },
-                    ].map((field) => (
-                      <div key={field.key}>
-                        <label className={labelClass}>{field.label}</label>
-                        <input
-                          disabled={isViewOnly}
-                          className={inputClass}
-                          value={field.isDetail ? (formData.oilDetails?.[field.key] || '') : (formData[field.key] || '')}
-                          onChange={(e) =>
-                            field.isDetail
-                              ? setFormData({
-                                  ...formData,
-                                  oilDetails: { ...formData.oilDetails, [field.key]: e.target.value },
-                                })
-                              : setFormData({ ...formData, [field.key]: e.target.value })
-                          }
-                        />
-                      </div>
-                    ))}
+                    {renderField('別名', 'alias')}
+                    {renderField('植物種類／萃取部位', 'typePart')}
+                    {renderField('萃取方法', 'method')}
+                    {renderField('外文名', 'englishName')}
+                    {renderField('拉丁學名', 'latin')}
+                    {renderField('科名', 'family')}
+                    {renderField('性味', 'nature')}
+                    {renderField('五行／陰陽屬性', 'property')}
+                    {renderField('歸經', 'meridian')}
+                    {renderField('主治', 'indications')}
+                    {renderField('類比音符', 'noteAnalogy')}
+                    {renderField('主宰星球', 'planet')}
+                    {renderField('重要產地', 'origin')}
                   </div>
 
                   <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={labelClass}>🔍 氣味</label>
-                      <textarea
-                        disabled={isViewOnly}
-                        value={formData.oilDetails?.scent || ''}
-                        className={textareaClass}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            oilDetails: { ...formData.oilDetails, scent: e.target.value },
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>✨ 外觀描述</label>
-                      <textarea
-                        disabled={isViewOnly}
-                        value={formData.oilDetails?.appearance || ''}
-                        className={textareaClass}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            oilDetails: { ...formData.oilDetails, appearance: e.target.value },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="col-span-1 md:col-span-2">
-                      <label className={labelClass}>📜 應用歷史與相關神話</label>
-                      <textarea
-                        disabled={isViewOnly}
-                        value={formData.oilDetails?.historyMyth || ''}
-                        className={`${textareaClass} h-32`}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            oilDetails: { ...formData.oilDetails, historyMyth: e.target.value },
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={labelClass}>🔬 化學結構</label>
-                      <textarea
-                        disabled={isViewOnly}
-                        value={formData.oilDetails?.chemistry || ''}
-                        className={textareaClass}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            oilDetails: { ...formData.oilDetails, chemistry: e.target.value },
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>⚖️ 屬性</label>
-                      <textarea
-                        disabled={isViewOnly}
-                        value={formData.oilDetails?.attribute || ''}
-                        className={textareaClass}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            oilDetails: { ...formData.oilDetails, attribute: e.target.value },
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="bg-red-50/40 p-4 rounded-xl border border-red-200/40">
-                    <label className={`${labelClass} text-red-800`}>⚠️ 注意事項</label>
-                    <textarea
-                      disabled={isViewOnly}
-                      value={formData.oilDetails?.caution || ''}
-                      className={textareaClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          oilDetails: { ...formData.oilDetails, caution: e.target.value },
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="col-span-1 md:col-span-2 bg-[#F7F5F0]/60 p-6 rounded-xl border border-[#E5E0D8]/40 space-y-4">
-                    <span className="font-bold text-[#3A4F3F] block border-b border-[#E5E0D8] pb-1.5 text-sm">🩺 深度效能</span>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {['心靈療效', '身體療效', '皮膚療效'].map((type) => {
-                        const key = type === '心靈療效' ? 'mindEffect' : type === '身體療效' ? 'bodyEffect' : 'skinEffect';
-                        return (
-                          <div key={type} className="bg-white p-4 rounded-lg border border-[#E5E0D8]/40 shadow-sm">
-                            <label className="text-xs font-bold text-[#6B9080] uppercase tracking-wider mb-2 block">{type}</label>
-                            <textarea
-                              disabled={isViewOnly}
-                              value={formData.oilDetails?.[key] || ''}
-                              className={`${textareaClass} h-40`}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  oilDetails: { ...formData.oilDetails, [key]: e.target.value },
-                                })
-                              }
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 bg-[#3A4F3F]/5 p-6 rounded-xl border border-[#3A4F3F]/10">
-                    <label className={labelClass}>🔗 適合與之調和的精油</label>
-                    <textarea
-                      disabled={isViewOnly}
-                      value={formData.oilDetails?.blendingOils || ''}
-                      className={textareaClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          oilDetails: { ...formData.oilDetails, blendingOils: e.target.value },
-                        })
-                      }
-                    />
-                    <label className={labelClass}>🧪 精油配方</label>
-                    <textarea
-                      disabled={isViewOnly}
-                      value={formData.oilDetails?.formulas || ''}
-                      className={textareaClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          oilDetails: { ...formData.oilDetails, formulas: e.target.value },
-                        })
-                      }
-                    />
-                    <label className={labelClass}>🧴 按摩基底油</label>
-                    <textarea
-                      disabled={isViewOnly}
-                      value={formData.oilDetails?.carrierOil || ''}
-                      className={textareaClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          oilDetails: { ...formData.oilDetails, carrierOil: e.target.value },
-                        })
-                      }
-                    />
-                    <label className={labelClass}>🚀 使用方法</label>
-                    <textarea
-                      disabled={isViewOnly}
-                      value={formData.oilDetails?.usage || ''}
-                      className={textareaClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          oilDetails: { ...formData.oilDetails, usage: e.target.value },
-                        })
-                      }
-                    />
+                    {renderField('🔍 氣味', 'oilDetails.scent', '', true)}
+                    {renderField('✨ 外觀描述', 'oilDetails.appearance', '', true)}
+                    {renderField('📜 應用歷史與相關神話', 'oilDetails.historyMyth', '', true)}
+                    {renderField('🔬 化學結構', 'oilDetails.chemistry', '', true)}
+                    {renderField('⚖️ 屬性補充', 'oilDetails.attribute', '', true)}
+                    {renderField('⚠️ 注意事項', 'oilDetails.caution', '', true)}
+                    {renderField('心靈療效', 'oilDetails.mindEffect', '', true)}
+                    {renderField('身體療效', 'oilDetails.bodyEffect', '', true)}
+                    {renderField('皮膚療效', 'oilDetails.skinEffect', '', true)}
+                    {renderField('適合調和的精油', 'oilDetails.blendingOils', '', true)}
+                    {renderField('精油配方', 'oilDetails.formulas', '', true)}
+                    {renderField('按摩基底油', 'oilDetails.carrierOil', '', true)}
+                    {renderField('使用方法', 'oilDetails.usage', '', true)}
                   </div>
                 </div>
               )}
@@ -488,339 +388,64 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
               {formData.category === '穴道' && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <input
-                      placeholder="國際代碼"
-                      value={formData.acuTable?.code || ''}
-                      className={inputClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          acuTable: { ...formData.acuTable, code: e.target.value },
-                        })
-                      }
-                    />
-                    <input
-                      placeholder="經絡"
-                      value={formData.acuTable?.meridian || ''}
-                      className={inputClass}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          acuTable: { ...formData.acuTable, meridian: e.target.value },
-                        })
-                      }
-                    />
+                    {renderField('國際代碼', 'acuTable.code')}
+                    {renderField('經絡', 'acuTable.meridian')}
                   </div>
-                  <input
-                    placeholder="別名"
-                    value={formData.acuTable?.alias || ''}
-                    className={inputClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuTable: { ...formData.acuTable, alias: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="主治"
-                    value={formData.acuDetails?.indications || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, indications: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="🏷️ 類別"
-                    value={formData.acuDetails?.type || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, type: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="📖 釋名"
-                    value={formData.acuDetails?.nameExpl || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, nameExpl: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="📍 位置"
-                    value={formData.acuDetails?.location || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, location: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="💀 解剖"
-                    value={formData.acuDetails?.anatomy || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, anatomy: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="🎯 操作"
-                    value={formData.acuDetails?.operation || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, operation: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="古代功效"
-                    value={formData.acuDetails?.effectAncient || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, effectAncient: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="現代功效"
-                    value={formData.acuDetails?.effectModern || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, effectModern: e.target.value },
-                      })
-                    }
-                  />
-                  <textarea
-                    placeholder="🔗 配穴"
-                    value={formData.acuDetails?.matchingPoints || ''}
-                    className={textareaClass}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        acuDetails: { ...formData.acuDetails, matchingPoints: e.target.value },
-                      })
-                    }
-                  />
+                  {renderField('別名', 'acuTable.alias')}
+                  {renderField('主治', 'acuDetails.indications', '', true)}
+                  {renderField('類別', 'acuDetails.type', '', true)}
+                  {renderField('釋名', 'acuDetails.nameExpl', '', true)}
+                  {renderField('位置', 'acuDetails.location', '', true)}
+                  {renderField('解剖', 'acuDetails.anatomy', '', true)}
+                  {renderField('操作', 'acuDetails.operation', '', true)}
+                  {renderField('古代功效', 'acuDetails.effectAncient', '', true)}
+                  {renderField('現代功效', 'acuDetails.effectModern', '', true)}
+                  {renderField('配穴', 'acuDetails.matchingPoints', '', true)}
                 </div>
               )}
 
               {formData.category === '中藥' && (
                 <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <input
-                      placeholder="別名"
-                      value={formData.alias || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, alias: e.target.value })}
-                    />
-                    <input
-                      placeholder="科屬"
-                      value={formData.family || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, family: e.target.value })}
-                    />
-                    <input
-                      placeholder="性味"
-                      value={formData.nature || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, nature: e.target.value })}
-                    />
-                    <input
-                      placeholder="歸經"
-                      value={formData.meridian || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, meridian: e.target.value })}
-                    />
+                    {renderField('別名', 'alias')}
+                    {renderField('科屬', 'family')}
+                    {renderField('性味', 'nature')}
+                    {renderField('歸經', 'meridian')}
                   </div>
-                  <textarea
-                    placeholder="品種來源"
-                    value={formData.source || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="性狀"
-                    value={formData.traits || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, traits: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="功效"
-                    value={formData.effect || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, effect: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="主治"
-                    value={formData.indications || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, indications: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="用法用量"
-                    value={formData.dosage || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="現代藥理"
-                    value={formData.pharmacology || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, pharmacology: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="現代應用"
-                    value={formData.contemporary || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, contemporary: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="選方"
-                    value={formData.medicine || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, medicine: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="文獻別錄"
-                    value={formData.literature || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, literature: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="注意禁忌"
-                    value={formData.contraindication || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, contraindication: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="炮製儲藏"
-                    value={formData.preparation || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, preparation: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="附藥說明"
-                    value={formData.directions || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, directions: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="註"
-                    value={formData.note || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                  />
+                  {renderField('品種來源', 'source', '', true)}
+                  {renderField('性狀', 'traits', '', true)}
+                  {renderField('功效', 'effect', '', true)}
+                  {renderField('主治', 'indications', '', true)}
+                  {renderField('用法用量', 'dosage', '', true)}
+                  {renderField('現代藥理', 'pharmacology', '', true)}
+                  {renderField('現代應用', 'contemporary', '', true)}
+                  {renderField('選方', 'medicine', '', true)}
+                  {renderField('文獻別錄', 'literature', '', true)}
+                  {renderField('注意禁忌', 'contraindication', '', true)}
+                  {renderField('炮製儲藏', 'preparation', '', true)}
+                  {renderField('附藥說明', 'directions', '', true)}
+                  {renderField('註', 'note', '', true)}
                 </div>
               )}
 
               {formData.category === '方劑' && (
                 <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <input
-                      placeholder="別名"
-                      value={formData.alias || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, alias: e.target.value })}
-                    />
-                    <input
-                      placeholder="來源"
-                      value={formData.source || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                    />
-                    <input
-                      placeholder="功效"
-                      value={formData.effect || ''}
-                      className={inputClass}
-                      onChange={(e) => setFormData({ ...formData, effect: e.target.value })}
-                    />
+                    {renderField('別名', 'alias')}
+                    {renderField('來源', 'source')}
+                    {renderField('功效', 'effect')}
                   </div>
-                  <textarea
-                    placeholder="製法用量"
-                    value={formData.preparation || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, preparation: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="主治"
-                    value={formData.indications || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, indications: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="文獻別錄"
-                    value={formData.literature || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, literature: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="方義"
-                    value={formData.analysis || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, analysis: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="方論"
-                    value={formData.discussion || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, discussion: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="辨證要點"
-                    value={formData.syndrome || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, syndrome: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="加減"
-                    value={formData.modifications || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, modifications: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="注意禁忌"
-                    value={formData.contraindication || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, contraindication: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="現代應用"
-                    value={formData.modernApp || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, modernApp: e.target.value })}
-                  />
-                    <textarea
-                    placeholder="現代藥理"
-                    value={formData.modernpharmacolog || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, modernpharmacolog: e.target.value })}
-                  />
-                  <textarea
-                    placeholder="附方"
-                    value={formData.prescription || ''}
-                    className={textareaClass}
-                    onChange={(e) => setFormData({ ...formData, prescription: e.target.value })}
-                  />
+                  {renderField('製法用量', 'preparation', '', true)}
+                  {renderField('主治', 'indications', '', true)}
+                  {renderField('文獻別錄', 'literature', '', true)}
+                  {renderField('方義', 'analysis', '', true)}
+                  {renderField('方論', 'discussion', '', true)}
+                  {renderField('辨證要點', 'syndrome', '', true)}
+                  {renderField('加減', 'modifications', '', true)}
+                  {renderField('注意禁忌', 'contraindication', '', true)}
+                  {renderField('現代應用', 'modernApp', '', true)}
+                  {renderField('現代藥理', 'modernPharmacology', '', true)}
+                  {renderField('附方', 'prescription', '', true)}
                 </div>
               )}
             </div>
@@ -830,7 +455,7 @@ export default function AddEntryPage({ onClose, editingItem, isViewOnly = false 
                 onClick={onClose}
                 className="px-8 py-3 text-[#A39284] font-fttf hover:text-[#3A4F3F] transition-colors"
               >
-                {isViewOnly ? "關閉" : "取消"}
+                {isViewOnly ? '關閉' : '取消'}
               </button>
               {!isViewOnly && (
                 <button

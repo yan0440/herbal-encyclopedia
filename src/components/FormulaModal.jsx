@@ -104,7 +104,7 @@ export default function FormulaModal({ item, onClose }) {
     { label: '加減變化', val: item.modifications },
     { label: '注意禁忌', val: item.contraindication },
     { label: '現代應用', val: item.modernApp },
-    { label: '現代藥理', val: item.modernpharmacolog },
+    { label: '現代藥理', val: item.modernPharmacology },
     { label: '附方', val: item.prescription }
   ];
 

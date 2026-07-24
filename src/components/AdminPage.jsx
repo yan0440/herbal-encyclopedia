@@ -14,6 +14,8 @@ export default function AdminPage({ allData, onBack }) {
   const [viewingCard, setViewingCard] = useState(null);
   const [version, setVersion] = useState('v1.2.7');
   const [filterCategory, setFilterCategory] = useState('全部');
+  const [searchName, setSearchName] = useState('');
+  const [displayCount, setDisplayCount] = useState(10);
 
   useEffect(() => {
     fetch('/version.json')
@@ -23,11 +25,26 @@ export default function AdminPage({ allData, onBack }) {
     window.scrollTo(0, 0);
   }, [viewingItem, viewingCard, viewState]);
 
+  useEffect(() => {
+    setDisplayCount(10);
+  }, [filterCategory, searchName]);
+
   const categories = ['全部', '書籍', '精油', '穴道', '中藥', '方劑'];
-  const filteredEntries =
-    filterCategory === '全部'
-      ? allData
-      : allData.filter((item) => item.category === filterCategory);
+
+  const filteredEntries = allData
+    .filter((item) => filterCategory === '全部' || item.category === filterCategory)
+    .filter((item) =>
+      String(item.name || '').toLowerCase().includes(searchName.toLowerCase())
+    );
+
+  const displayedEntries = filteredEntries.slice(0, displayCount);
+
+  const handleLoadMore = () => setDisplayCount((prev) => prev + 10);
+
+  const handleDelete = async (id) => {
+    if (!confirm('確定刪除？')) return;
+    await deleteDoc(doc(db, 'entries', id));
+  };
 
   if (!isAuth) {
     return (
@@ -89,7 +106,7 @@ export default function AdminPage({ allData, onBack }) {
         />
       )}
 
-      <header className="shrink-0 bg-[#F7F5F0] px-6 md:px-10 py-6 border-b border-[#E5E0D8]">
+      <header className="shrink-0 bg-[#F7F5F0] px-6 md:px-10 py-6 border-b border-[#E5E0D8] print:hidden">
         <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
           <div>
             <h1 className="text-3xl font-bold text-[#3A4F3F]">開發者專區</h1>
@@ -115,9 +132,9 @@ export default function AdminPage({ allData, onBack }) {
         </div>
       </header>
 
-      <main className="flex-1 min-h-0 overflow-hidden px-6 md:px-10 py-6">
-        <div className="h-full flex flex-col gap-6">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+      <main className="flex-1 min-h-0 overflow-hidden px-6 md:px-10 py-6 print:p-0">
+        <div className="h-full flex flex-col min-h-0 gap-6">
+          <div className="shrink-0 flex gap-2 overflow-x-auto pb-2 print:hidden">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -133,27 +150,48 @@ export default function AdminPage({ allData, onBack }) {
             ))}
           </div>
 
+          <div className="shrink-0 flex items-center gap-3 print:hidden">
+            <input
+              type="text"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              placeholder="搜尋名稱"
+              className="w-full md:w-80 px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-white outline-none text-[#3A4F3F] placeholder:text-[#B8A99A]"
+            />
+            {searchName && (
+              <button
+                onClick={() => setSearchName('')}
+                className="px-4 py-2.5 rounded-xl bg-white border border-[#E5E0D8] text-[#6B7A6E] hover:bg-[#F0EDE6]"
+              >
+                清除
+              </button>
+            )}
+          </div>
+
           <div className="flex-1 min-h-0 overflow-y-auto pr-1">
             <div className="grid gap-3">
-              {filteredEntries.map((item) => (
+              {displayedEntries.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white p-5 rounded-2xl border border-[#E5E0D8]/60 flex justify-between items-center shadow-sm"
+                  className="bg-white p-5 rounded-2xl border border-[#E5E0D8]/60 flex justify-between items-center shadow-sm print:break-inside-avoid"
                 >
                   <span className="font-semibold text-[#3A4F3F]">{item.name}</span>
-                  <div className="flex gap-2 flex-wrap justify-end">
+
+                  <div className="flex gap-2 flex-wrap justify-end print:hidden">
                     <button
                       onClick={() => setViewingItem(item)}
                       className="px-4 py-2 text-sm text-[#3A4F3F] font-medium bg-[#F7F5F0] rounded-lg hover:bg-[#E5E0D8]"
                     >
                       檢視
                     </button>
+
                     <button
                       onClick={() => setViewingCard(item)}
                       className="px-4 py-2 text-sm text-[#3A4F3F] font-medium bg-[#F7F5F0] rounded-lg hover:bg-[#E5E0D8]"
                     >
                       圖卡
                     </button>
+
                     <button
                       onClick={() => {
                         setEditingItem(item);
@@ -163,10 +201,9 @@ export default function AdminPage({ allData, onBack }) {
                     >
                       編輯
                     </button>
+
                     <button
-                      onClick={async () => {
-                        if (confirm('確定刪除？')) await deleteDoc(doc(db, 'entries', item.id));
-                      }}
+                      onClick={() => handleDelete(item.id)}
                       className="px-4 py-2 text-sm text-[#D4A373] font-medium bg-[#F7F5F0] rounded-lg hover:bg-[#E5E0D8]"
                     >
                       刪除
@@ -175,6 +212,17 @@ export default function AdminPage({ allData, onBack }) {
                 </div>
               ))}
             </div>
+
+            {filteredEntries.length > 10 && displayedEntries.length < filteredEntries.length && (
+              <div className="pt-4 pb-2 flex justify-center print:hidden">
+                <button
+                  onClick={handleLoadMore}
+                  className="rounded-full bg-[#2F4638] px-5 py-2.5 text-sm font-medium text-white shadow-md hover:opacity-90 transition-all"
+                >
+                  載入更多
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>
